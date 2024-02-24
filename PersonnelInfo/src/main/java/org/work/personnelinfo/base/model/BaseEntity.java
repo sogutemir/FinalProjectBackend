@@ -11,11 +11,9 @@ import org.work.personnelinfo.resourceFile.model.ResourceFileEntity;
 @MappedSuperclass
 public abstract class BaseEntity {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "resource_file_id")

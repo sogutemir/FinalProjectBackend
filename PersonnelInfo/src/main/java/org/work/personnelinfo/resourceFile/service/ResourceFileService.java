@@ -14,6 +14,7 @@ import org.work.personnelinfo.resourceFile.dto.ResourceFileDTO;
 import org.work.personnelinfo.resourceFile.model.ResourceFileEntity;
 import org.work.personnelinfo.resourceFile.repository.ResourceFileRepository;
 import org.work.personnelinfo.resourceFile.utility.ResourceFileUtils;
+import org.work.personnelinfo.slide.model.SlideEntity;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -75,6 +76,7 @@ public class ResourceFileService {
     }
 
     private void associateEntityWithFile(BaseEntity entity, ResourceFileEntity fileEntity) {
+
         switch (entity.getClass().getSimpleName()) {
             case "PersonelEntity":
                 PersonelEntity personelEntity = (PersonelEntity) entity;
@@ -87,6 +89,10 @@ public class ResourceFileService {
             case "ActivityEntity":
                 ActivityEntity activityEntity = (ActivityEntity) entity;
                 activityEntity.setResourceFile(fileEntity);
+                break;
+            case"SlideEntity":
+                SlideEntity slideEntity = (SlideEntity) entity;
+                slideEntity.setResourceFile(fileEntity);
                 break;
             default:
                 throw new IllegalArgumentException("Entity type not supported");

@@ -1,6 +1,8 @@
 package org.work.personnelinfo.personel.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import lombok.*;
 
 @Getter
@@ -32,7 +34,7 @@ public class PersonelDTO  {
     private String serviceUsage;
     private String internalNumber;
     private String roomNumber;
-
     private Long photoId;
+    private LocalDateTime employmentStartDate;
 
 }

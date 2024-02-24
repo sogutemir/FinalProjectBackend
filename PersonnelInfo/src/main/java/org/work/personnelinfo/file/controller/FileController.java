@@ -30,20 +30,20 @@ public class FileController {
         }
     }
 
-@GetMapping("/{personelId}")
-public ResponseEntity<?> getFilesByPersonelId(@PathVariable(required = false) Long personelId) {
-    try {
-        List<FileDTO> fileDTO = fileService.getFileByPersonelId(personelId);
-        if (fileDTO.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No files found for personelId: " + personelId);
+    @GetMapping("/{personelId}")
+    public ResponseEntity<?> getFilesByPersonelId(@PathVariable(required = false) Long personelId) {
+        try {
+            List<FileDTO> fileDTO = fileService.getFileByPersonelId(personelId);
+            if (fileDTO.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No files found for personelId: " + personelId);
+            }
+            return new ResponseEntity<>(fileDTO, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }
-        return new ResponseEntity<>(fileDTO, HttpStatus.OK);
-    } catch (EntityNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
     }
-}
 
     @PostMapping("/add")
     public ResponseEntity<?> addFile(@RequestParam(value = "file") MultipartFile file,

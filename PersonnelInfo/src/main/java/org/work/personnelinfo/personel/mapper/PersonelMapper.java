@@ -13,6 +13,7 @@ import org.work.personnelinfo.personel.model.PersonelEntity;
 public interface PersonelMapper {
 
     @Mapping(target = "photoId", source = "resourceFile.id")
+    @Mapping(target = "employmentStartDate", source = "startDateOfEmployment")
     PersonelDTO modelToDTO(PersonelEntity personelEntity);
 
     PersonelEntity dtoToModel(PersonelDTO personelDTO);

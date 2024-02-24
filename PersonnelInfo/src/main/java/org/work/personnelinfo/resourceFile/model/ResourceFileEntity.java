@@ -5,6 +5,7 @@ import lombok.*;
 import org.work.personnelinfo.activity.model.ActivityEntity;
 import org.work.personnelinfo.file.model.FileEntity;
 import org.work.personnelinfo.personel.model.PersonelEntity;
+import org.work.personnelinfo.slide.model.SlideEntity;
 
 import java.time.LocalDateTime;
 
@@ -30,7 +31,6 @@ public class ResourceFileEntity  {
     @Column(name="resource_file_Data")
     private byte[] data;
 
-
     @Column(name = "upload_date")
     private LocalDateTime uploadDate;
     @PrePersist
@@ -47,4 +47,8 @@ public class ResourceFileEntity  {
 
     @OneToOne(mappedBy = "resourceFile", fetch = FetchType.LAZY)
     private ActivityEntity activity;
+
+    @OneToOne(mappedBy = "resourceFile", fetch = FetchType.LAZY)
+    private SlideEntity slide;
+
 }
