@@ -52,10 +52,7 @@ public class PersonelService {
         personelEntity = personelRepository.save(personelEntity);
 
         if (file != null && !file.isEmpty()) {
-            Long fileId = resourceFileService.uploadFile(file, personelEntity);
-
-            personelEntity.getResourceFile().setId(fileId);
-            personelDTO.setPhotoId(fileId);
+            resourceFileService.uploadFile(file, personelEntity);
         }
 
         return personelMapper.modelToDTO(personelEntity);
