@@ -25,7 +25,7 @@ public class ResourceFileService {
     private final ResourceFileRepository fileRepository;
 
     @Transactional
-    public String uploadFile(MultipartFile file, BaseEntity entity) throws IOException {
+    public Long uploadFile(MultipartFile file, BaseEntity entity) throws IOException {
         if (entity == null) {
             throw new IllegalArgumentException("Entity cannot be null");
         }
@@ -48,11 +48,8 @@ public class ResourceFileService {
 
         ResourceFileEntity savedFile = fileRepository.save(fileEntity);
 
-        if (savedFile != null) {
-            return "Saved file in DB with name: " + fileName;
-        } else {
-            return "Error: File not saved.";
-        }
+        return savedFile.getId();
+
     }
 
     @Transactional(readOnly = true)

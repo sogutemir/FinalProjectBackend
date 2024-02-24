@@ -1,6 +1,7 @@
 package org.work.personnelinfo.resourceFile.dto;
 
 public class ResourceFileDTO {
+    private Long id;
     private byte[] data;
     private String fileName;
 
@@ -9,7 +10,10 @@ public class ResourceFileDTO {
         this.fileName = fileName;
     }
 
-    // Getter ve Setter'lar
+    public Long getId() {
+        return id;
+    }
+
     public byte[] getData() {
         return data;
     }

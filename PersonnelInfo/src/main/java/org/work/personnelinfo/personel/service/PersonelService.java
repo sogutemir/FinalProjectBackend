@@ -12,6 +12,8 @@ import org.work.personnelinfo.personel.model.PersonelEntity;
 import org.work.personnelinfo.resourceFile.service.ResourceFileService;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +33,13 @@ public class PersonelService {
                 .orElseThrow(() -> new EntityNotFoundException("Personel not found with id: " + id));
     }
 
+    @Transactional(readOnly = true)
+    public List<PersonelDTO> getPersonelAll() {
+        List<PersonelEntity> personelEntities = personelRepository.findAll();
+        return personelEntities.stream()
+                .map(personelMapper::modelToDTO)
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     public PersonelDTO addPersonel(PersonelDTO personelDTO, MultipartFile file) throws IOException {
@@ -43,7 +52,10 @@ public class PersonelService {
         personelEntity = personelRepository.save(personelEntity);
 
         if (file != null && !file.isEmpty()) {
-            resourceFileService.uploadFile(file, personelEntity);
+            Long fileId = resourceFileService.uploadFile(file, personelEntity);
+
+            personelEntity.getResourceFile().setId(fileId);
+            personelDTO.setPhotoId(fileId);
         }
 
         return personelMapper.modelToDTO(personelEntity);

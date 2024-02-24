@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.work.personnelinfo.personel.dto.PersonelDTO;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,6 +25,18 @@ public class PersonelController {
     public ResponseEntity<?> getPersonelById(@PathVariable Long id) {
         try {
             PersonelDTO personelDTO = personelService.getPersonelById(id);
+            return new ResponseEntity<>(personelDTO, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllPersonel() {
+        try {
+            List<PersonelDTO> personelDTO = personelService.getPersonelAll();
             return new ResponseEntity<>(personelDTO, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

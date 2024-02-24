@@ -22,13 +22,17 @@ public class PersonelDTO  {
     private String residenceAddress;
     private String registrationNo;
     private String position;
+    private String bloodType;
     private String title;
-    private String unit;
+    private String teamName;
+    private String department;
     private String task;
     private String personnelType;
     private String workStatus;
     private String serviceUsage;
     private String internalNumber;
     private String roomNumber;
+
+    private Long photoId;
 
 }

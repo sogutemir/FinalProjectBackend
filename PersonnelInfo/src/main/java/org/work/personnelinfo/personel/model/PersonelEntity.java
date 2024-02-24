@@ -56,6 +56,10 @@ public class PersonelEntity extends BaseEntity {
     @Column(name = "phone")
     private String phone;
 
+    @NotBlank(message = "Blood type is required")
+    @Column(name = "blood_type")
+    private String bloodType;
+
     @NotBlank(message = "Emergency contact is required")
     @Column(name = "emergency_contact")
     private String emergencyContact;
@@ -78,6 +82,9 @@ public class PersonelEntity extends BaseEntity {
     @NotBlank(message = "Registration number is required")
     private String registrationNo;
 
+    @NotBlank(message = "Department information is required")
+    private String department;
+
     @NotBlank(message = "Position information is required")
     @Column(name = "position")
     private String position;
@@ -86,9 +93,9 @@ public class PersonelEntity extends BaseEntity {
     @Column(name = "title")
     private String title;
 
-    @NotBlank(message = "Unit information is required")
-    @Column(name = "unit")
-    private String unit;
+    @NotBlank(message = "Team Name information is required")
+    @Column(name = "team_name")
+    private String teamName;
 
     @NotBlank(message = "Task information is required")
     @Column(name = "task")
