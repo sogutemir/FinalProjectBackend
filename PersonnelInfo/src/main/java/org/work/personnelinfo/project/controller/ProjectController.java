@@ -29,7 +29,7 @@ public class ProjectController {
         }
     }
 
-    @GetMapping("/{personelId}")
+    @GetMapping("getByPersonelId/{personelId}")
     public ResponseEntity<?> getProjectByPersonelId(@PathVariable Long personelId) {
         try {
             List<ProjectDTO> projectDTO = projectService.getProjectsByPersonelId(personelId);

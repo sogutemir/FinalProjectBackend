@@ -17,14 +17,6 @@ import java.time.LocalDateTime;
 @Table(name = "personel_file")
 public class FileEntity extends BaseEntity {
 
-    @NotBlank(message = "File type cannot be empty")
-    @Column(name = "file_type")
-    private String fileType;
-
-    @NotBlank(message = "File name cannot be empty")
-    @Column(name = "file_name")
-    private String fileName;
-
     @NotBlank(message = "Section cannot be empty")
     @Column(name = "section")
     private String section;

@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,6 +19,8 @@ public class ActivityDTO  {
     private String description;
     private String link;
     private String eventType;
+    private LocalDateTime uploadDate;
+    private String fileName;
 
     @NotNull
     private Long personelId;

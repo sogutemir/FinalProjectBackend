@@ -31,7 +31,7 @@ public class ActivityController {
         }
     }
 
-    @GetMapping("/{personelId}")
+    @GetMapping("getByPersonelId/{personelId}")
     public ResponseEntity<?> getActivitiesByPersonelId(@PathVariable Long personelId){
         try{
             List<ActivityDTO> activityDTO = activityService.getActivitiesByPersonelId(personelId);

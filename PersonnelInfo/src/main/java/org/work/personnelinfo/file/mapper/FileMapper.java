@@ -12,6 +12,8 @@ import org.work.personnelinfo.file.model.FileEntity;
 public interface FileMapper {
 
     @Mapping(target = "personelId", source = "personel.id")
+    @Mapping(target = "fileName", source = "resourceFile.name")
+    @Mapping(target = "fileType", source = "resourceFile.type")
     FileDTO modelToDTO(FileEntity fileEntity);
 
     @Mapping(target = "personel.id", source = "personelId")

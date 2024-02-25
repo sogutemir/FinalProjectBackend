@@ -30,7 +30,7 @@ public class FileController {
         }
     }
 
-    @GetMapping("/{personelId}")
+    @GetMapping("getByPersonelId/{personelId}")
     public ResponseEntity<?> getFilesByPersonelId(@PathVariable(required = false) Long personelId) {
         try {
             List<FileDTO> fileDTO = fileService.getFileByPersonelId(personelId);

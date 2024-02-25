@@ -30,7 +30,7 @@ public class EducationController {
         }
     }
 
-    @GetMapping("/{personelId}")
+    @GetMapping("getByPersonelId/{personelId}")
     public ResponseEntity<?> getEducationByPersonelId(@PathVariable Long personelId) {
         try {
             List<EducationDTO> educationDTO = educationService.getEducationsByPersonelId(personelId);
