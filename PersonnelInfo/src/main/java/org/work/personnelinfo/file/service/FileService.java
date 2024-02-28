@@ -20,27 +20,22 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class FileService {
-
     private final FileRepository fileRepository;
     private final ResourceFileService resourceFileService;
     private final PersonelRepository personelRepository;
     private final FileMapper fileMapper;
 
     @Transactional(readOnly = true)
-    public FileDTO getFileById(Long id){
-        if (id == null) {
-            throw new IllegalArgumentException("Id cannot be null");
-        }
+    public FileDTO fetchFileById(Long id) {
+        validateId(id);
         return fileRepository.findById(id)
                 .map(fileMapper::modelToDTO)
                 .orElseThrow(() -> new IllegalArgumentException("File not found with id: " + id));
     }
 
     @Transactional(readOnly = true)
-    public List<FileDTO> getFileByPersonelId(Long personelId){
-        if (personelId == null) {
-            throw new IllegalArgumentException("PersonelId cannot be null");
-        }
+    public List<FileDTO> fetchFilesByPersonelId(Long personelId) {
+        validateId(personelId);
         return fileRepository.findByPersonelId(personelId)
                 .stream()
                 .map(fileMapper::modelToDTO)
@@ -48,60 +43,78 @@ public class FileService {
     }
 
     @Transactional
-    public FileDTO addFile(FileDTO fileDTO, MultipartFile file) throws IOException {
-        if (fileDTO == null || fileDTO.getPersonelId() == null) {
-            throw new IllegalArgumentException("EducationDTO or personelId cannot be null");
+    public FileDTO addNewFile(FileDTO fileDTO, MultipartFile file) throws IOException {
+        validateInputs(fileDTO, fileDTO.getPersonelId());
+
+        FileEntity fileEntity = instantiateFileEntity(fileDTO);
+
+        processUpload(file, fileEntity);
+
+        return fileMapper.modelToDTO(fileEntity);
+    }
+
+    @Transactional
+    public FileDTO updateExistingFile(Long fileId, FileDTO fileDTO, MultipartFile file) throws IOException {
+        validateInputs(fileId, fileDTO);
+
+        FileEntity updatedFileEntity = applyUpdates(fileId, fileDTO, file);
+
+        return fileMapper.modelToDTO(updatedFileEntity);
+    }
+
+    @Transactional
+    public void removeFile(Long fileId) throws FileNotFoundException {
+        validateId(fileId);
+        FileEntity fileEntity = validateExistingFile(fileId);
+        if (fileEntity.getResourceFile() != null) {
+            resourceFileService.deleteFile(fileEntity.getResourceFile().getId());
         }
+        fileRepository.delete(fileEntity);
+    }
+
+    // Extracted Methods
+    private void validateId(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Id cannot be null");
+        }
+    }
+
+    private void validateInputs(Object... inputs) {
+        for (Object input : inputs) {
+            if (input == null) {
+                throw new IllegalArgumentException("Inputs cannot be null");
+            }
+        }
+    }
+
+    private FileEntity instantiateFileEntity(FileDTO fileDTO) {
         FileEntity fileEntity = fileMapper.dtoToModel(fileDTO);
 
         PersonelEntity personelEntity = personelRepository.findById(fileDTO.getPersonelId())
                 .orElseThrow(() -> new IllegalArgumentException("Personel not found with id: " + fileDTO.getPersonelId()));
 
         fileEntity.setPersonel(personelEntity);
+        fileRepository.save(fileEntity);
 
-        fileEntity = fileRepository.save(fileEntity);
-
-        if(file != null && !file.isEmpty()){
-            resourceFileService.uploadFile(file, fileEntity);
-        }
-        return fileMapper.modelToDTO(fileEntity);
+        return fileEntity;
     }
 
-    @Transactional
-    public FileDTO updateFile(Long fileId, FileDTO fileDTO, MultipartFile file) throws IOException {
-
-        if(fileId == null || fileDTO == null){
-            throw new IllegalArgumentException("FileId and FileDTO cannot be null");
+    private void processUpload(MultipartFile file, FileEntity fileEntity) throws IOException {
+        if (file != null && !file.isEmpty()) {
+            resourceFileService.saveFile(file, fileEntity);
         }
-
-        FileEntity existingFileEntity = fileRepository.findById(fileId)
-                .orElseThrow(() -> new IllegalArgumentException("File not found with id: " + fileId));
-
-        fileMapper.updateModel(fileDTO, existingFileEntity);
-
-        if(file != null && !file.isEmpty()){
-            if(existingFileEntity.getResourceFile() != null){
-                resourceFileService.deleteFile(existingFileEntity.getResourceFile().getId());
-            }
-            resourceFileService.uploadFile(file, existingFileEntity);
-        }
-
-        FileEntity updatedFileEntity = fileRepository.save(existingFileEntity);
-
-        return fileMapper.modelToDTO(updatedFileEntity);
     }
 
-    @Transactional
-    public void deleteFile(Long fileId) throws FileNotFoundException {
-        if(fileId == null){
-            throw new IllegalArgumentException("FileId cannot be null");
-        }
-        FileEntity fileEntity = fileRepository.findById(fileId)
+    private FileEntity validateExistingFile(Long fileId) throws FileNotFoundException {
+        return fileRepository.findById(fileId)
                 .orElseThrow(() -> new FileNotFoundException("File not found with id: " + fileId));
-        if(fileEntity.getResourceFile() != null){
-            resourceFileService.deleteFile(fileEntity.getResourceFile().getId());
-        }
-        fileRepository.delete(fileEntity);
     }
 
+    private FileEntity applyUpdates(Long fileId, FileDTO fileDTO, MultipartFile file) throws IOException {
+        FileEntity existingFileEntity = validateExistingFile(fileId);
+        fileMapper.updateModel(fileDTO, existingFileEntity);
+        processUpload(file, existingFileEntity);
+
+        return fileRepository.save(existingFileEntity);
+    }
 }

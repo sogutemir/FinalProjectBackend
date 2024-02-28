@@ -3,6 +3,7 @@ package org.work.personnelinfo.project.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.work.personnelinfo.project.dto.ProjectDTO;
+import org.work.personnelinfo.project.dto.ProjectUpdateRequestDTO;
 import org.work.personnelinfo.project.service.ProjectService;
 
 import java.util.List;
@@ -30,9 +31,11 @@ public class ProjectController {
     }
 
     @PutMapping("/update/{projectId}")
-    public ProjectDTO updateProject(@PathVariable Long projectId,
-                                    @ModelAttribute ProjectDTO projectDTO) {
-        return projectService.updateProject(projectId, projectDTO);
+    public ProjectDTO updateProject(@PathVariable Long projectId, @ModelAttribute ProjectDTO projectDTO){
+        ProjectUpdateRequestDTO updateRequest = new ProjectUpdateRequestDTO();
+        updateRequest.setProjectId(projectId);
+        updateRequest.setProjectDTO(projectDTO);
+        return projectService.updateProject(updateRequest);
     }
 
     @DeleteMapping("/delete/{projectId}")

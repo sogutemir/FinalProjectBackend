@@ -19,29 +19,29 @@ public class FileController {
 
     @GetMapping("/{id}")
     public FileDTO getFileById(@PathVariable Long id) {
-        return fileService.getFileById(id);
+        return fileService.fetchFileById(id);
     }
 
     @GetMapping("getByPersonelId/{personelId}")
     public List<FileDTO> getFilesByPersonelId(@PathVariable(required = false) Long personelId) {
-        return fileService.getFileByPersonelId(personelId);
+        return fileService.fetchFilesByPersonelId(personelId);
     }
 
     @PostMapping("/add")
     public FileDTO addFile(@RequestParam(value = "file") MultipartFile file,
                            @ModelAttribute FileDTO fileDTO) throws IOException {
-        return fileService.addFile(fileDTO, file);
+        return fileService.addNewFile(fileDTO, file);
     }
 
     @PutMapping("/update/{fileId}")
     public FileDTO updateFile(@PathVariable Long fileId,
                               @RequestParam(value = "file", required = false) MultipartFile file,
                               @ModelAttribute FileDTO fileDTO) throws IOException {
-        return fileService.updateFile(fileId, fileDTO, file);
+        return fileService.updateExistingFile(fileId, fileDTO, file);
     }
 
     @DeleteMapping("/delete/{fileId}")
     public void deleteFile(@PathVariable Long fileId) throws FileNotFoundException {
-        fileService.deleteFile(fileId);
+        fileService.removeFile(fileId);
     }
 }

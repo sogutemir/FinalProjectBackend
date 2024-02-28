@@ -22,77 +22,74 @@ import java.io.IOException;
 @Service
 @RequiredArgsConstructor
 public class ResourceFileService {
-
     private final ResourceFileRepository fileRepository;
 
+    private static final String ENTITY_CANNOT_BE_NULL = "Entity cannot be null";
+    private static final String FILE_EMPTY = "File is empty";
+    private static final String FILE_NOT_FOUND_MSG = "File not found with id: ";
+    private static final String DELETION_ERROR_MSG = "Error occurred while deleting the file with id: ";
+
     @Transactional
-    public String uploadFile(MultipartFile file, BaseEntity entity) throws IOException {
+    public String saveFile(MultipartFile file, BaseEntity entity) throws IOException {
+        validateFileAndEntity(file, entity);
+
+        ResourceFileEntity fileEntity = createResourceFileEntity(file);
+        associateEntityWithFile(entity, fileEntity);
+        fileRepository.save(fileEntity);
+        return "Saved file in DB with name: " + fileEntity.getName();
+    }
+
+    private void validateFileAndEntity(MultipartFile file, BaseEntity entity) {
         if (entity == null) {
-            throw new IllegalArgumentException("Entity cannot be null");
+            throw new IllegalArgumentException(ENTITY_CANNOT_BE_NULL);
         }
-
         if (file.isEmpty()) {
-            throw new IllegalArgumentException("File is empty");
+            throw new IllegalArgumentException(FILE_EMPTY);
         }
+    }
 
+    private ResourceFileEntity createResourceFileEntity(MultipartFile file) throws IOException {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
         String contentType = file.getContentType();
         byte[] compressedData = ResourceFileUtils.compressBytes(file.getBytes());
 
-        ResourceFileEntity fileEntity = ResourceFileEntity.builder()
+        return ResourceFileEntity.builder()
                 .name(fileName)
                 .type(contentType)
                 .data(compressedData)
                 .build();
-
-        associateEntityWithFile(entity, fileEntity);
-
-        ResourceFileEntity savedFile = fileRepository.save(fileEntity);
-
-        if (savedFile != null) {
-            return "Saved file in DB with name: " + fileName;
-        } else {
-            return "Error: File not saved.";
-        }
     }
 
     @Transactional(readOnly = true)
     public String getFileName(Long fileId) throws FileNotFoundException {
         return fileRepository.findById(fileId)
                 .map(ResourceFileEntity::getName)
-                .orElseThrow(() -> new FileNotFoundException("File not found with id: " + fileId));
+                .orElseThrow(() -> new FileNotFoundException(FILE_NOT_FOUND_MSG + fileId));
     }
-
 
     @Transactional(readOnly = true)
     public ResourceFileDTO downloadFile(Long fileId) throws FileNotFoundException {
         ResourceFileEntity retrievedFile = fileRepository.findById(fileId)
-                .orElseThrow(() -> new FileNotFoundException("File not found with id: " + fileId));
-
+                .orElseThrow(() -> new FileNotFoundException(FILE_NOT_FOUND_MSG + fileId));
         byte[] decompressedData = ResourceFileUtils.decompressBytes(retrievedFile.getData());
-        String fileName = retrievedFile.getName();
-
-        return new ResourceFileDTO(decompressedData, fileName);
+        return new ResourceFileDTO(decompressedData, retrievedFile.getName());
     }
 
-    private void associateEntityWithFile(BaseEntity entity, ResourceFileEntity fileEntity) {
+    public void associateEntityWithFile(BaseEntity entity, ResourceFileEntity fileEntity) {
+        String entityClassName = entity.getClass().getSimpleName();
 
-        switch (entity.getClass().getSimpleName()) {
+        switch (entityClassName) {
             case "PersonelEntity":
-                PersonelEntity personelEntity = (PersonelEntity) entity;
-                personelEntity.setResourceFile(fileEntity);
+                ((PersonelEntity) entity).setResourceFile(fileEntity);
                 break;
             case "FileEntity":
-                FileEntity fileEntity1 = (FileEntity) entity;
-                fileEntity1.setResourceFile(fileEntity);
+                ((FileEntity) entity).setResourceFile(fileEntity);
                 break;
             case "ActivityEntity":
-                ActivityEntity activityEntity = (ActivityEntity) entity;
-                activityEntity.setResourceFile(fileEntity);
+                ((ActivityEntity) entity).setResourceFile(fileEntity);
                 break;
-            case"SlideEntity":
-                SlideEntity slideEntity = (SlideEntity) entity;
-                slideEntity.setResourceFile(fileEntity);
+            case "SlideEntity":
+                ((SlideEntity) entity).setResourceFile(fileEntity);
                 break;
             default:
                 throw new IllegalArgumentException("Entity type not supported");
@@ -102,16 +99,13 @@ public class ResourceFileService {
     @Transactional
     public void deleteFile(Long fileId) throws FileNotFoundException {
         ResourceFileEntity file = fileRepository.findById(fileId)
-                .orElseThrow(() -> new FileNotFoundException("File not found with id: " + fileId));
+                .orElseThrow(() -> new FileNotFoundException(FILE_NOT_FOUND_MSG + fileId));
         try {
             fileRepository.delete(file);
         } catch (Exception e) {
-            throw new ServiceException("Error occurred while deleting the file with id: " + fileId, e);
+            throw new ServiceException(DELETION_ERROR_MSG + fileId, e);
         }
-
     }
-
-
 }
 
 //

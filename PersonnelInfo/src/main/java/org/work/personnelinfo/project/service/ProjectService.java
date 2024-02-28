@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.work.personnelinfo.personel.model.PersonelEntity;
 import org.work.personnelinfo.personel.repository.PersonelRepository;
 import org.work.personnelinfo.project.dto.ProjectDTO;
+import org.work.personnelinfo.project.dto.ProjectUpdateRequestDTO;
 import org.work.personnelinfo.project.mapper.ProjectMapper;
 import org.work.personnelinfo.project.model.ProjectEntity;
 import org.work.personnelinfo.project.repository.ProjectRepository;
@@ -16,16 +17,21 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
-
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final PersonelRepository personelRepository;
 
+    private void validateInput(Object... inputs) {
+        for (Object input : inputs) {
+            if (input == null) {
+                throw new IllegalArgumentException("Input cannot be null");
+            }
+        }
+    }
+
     @Transactional(readOnly = true)
     public ProjectDTO getProjectById(Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Id cannot be null");
-        }
+        validateInput(id);
         return projectRepository.findById(id)
                 .map(projectMapper::modelToDTO)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + id));
@@ -33,9 +39,7 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public List<ProjectDTO> getProjectsByPersonelId(Long personelId) {
-        if (personelId == null) {
-            throw new IllegalArgumentException("PersonelId cannot be null");
-        }
+        validateInput(personelId);
         return projectRepository.findByPersonelId(personelId)
                 .stream()
                 .map(projectMapper::modelToDTO)
@@ -44,40 +48,30 @@ public class ProjectService {
 
     @Transactional
     public ProjectDTO addProject(ProjectDTO projectDTO) {
-        if (projectDTO == null || projectDTO.getPersonelId() == null) {
-            throw new IllegalArgumentException("ProjectDTO or personelId cannot be null");
-        }
+        validateInput(projectDTO, projectDTO.getPersonelId());
 
         ProjectEntity projectEntity = projectMapper.dtoToModel(projectDTO);
-        PersonelEntity personelEntity = personelRepository.findById(projectDTO.getPersonelId())
+        PersonelEntity personel = personelRepository.findById(projectDTO.getPersonelId())
                 .orElseThrow(() -> new IllegalArgumentException("Personel not found with id: " + projectDTO.getPersonelId()));
 
-        projectEntity.setPersonel(personelEntity);
+        projectEntity.setPersonel(personel);
         projectEntity = projectRepository.save(projectEntity);
-
         return projectMapper.modelToDTO(projectEntity);
     }
 
     @Transactional
-    public ProjectDTO updateProject(Long projectId, ProjectDTO projectDTO) {
-        if (projectId == null || projectDTO == null) {
-            throw new IllegalArgumentException("ProjectId or ProjectDTO cannot be null");
-        }
+    public ProjectDTO updateProject(ProjectUpdateRequestDTO projectUpdateRequest) {
+        validateInput(projectUpdateRequest.getProjectId(), projectUpdateRequest.getProjectDTO());
 
-        ProjectEntity existingProjectEntity = projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + projectId));
-
-        projectMapper.updateModel(projectDTO, existingProjectEntity);
-
+        ProjectEntity existingProjectEntity = projectRepository.findById(projectUpdateRequest.getProjectId())
+                .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + projectUpdateRequest.getProjectId()));
+        projectMapper.updateModel(projectUpdateRequest.getProjectDTO(), existingProjectEntity);
         return projectMapper.modelToDTO(existingProjectEntity);
     }
 
     @Transactional
-    public void deleteProject(Long projectId){
-        if (projectId == null) {
-            throw new IllegalArgumentException("ProjectId cannot be null");
-        }
-
+    public void deleteProject(Long projectId) {
+        validateInput(projectId);
         ProjectEntity projectEntity = projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Experience not found with id: " + projectId));
         projectRepository.delete(projectEntity);

@@ -1,8 +1,6 @@
 package org.work.personnelinfo.admin.Service;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.work.personnelinfo.admin.model.UserEntity;
 import org.work.personnelinfo.admin.model.RoleEntity;
 import org.work.personnelinfo.admin.repository.UserRepository;
@@ -24,30 +22,30 @@ public class UserService {
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
+    public void initializeUsers() {
+        if (userRepository.count() == 0) {
+            createUsers();
+        }
+    }
 
     public void createUsers() {
         RoleEntity adminRole = ensureRoleExists("ADMIN");
         RoleEntity superUserRole = ensureRoleExists("SUPERUSER");
         RoleEntity userRole = ensureRoleExists("USER");
 
-        UserEntity admin = new UserEntity();
-        admin.setUsername("admin");
-        admin.setPassword(passwordEncoder.encode("admin123"));
-        admin.setRoles(new HashSet<>(Arrays.asList(adminRole)));
+        UserEntity admin = createUserEntity("admin", "admin123", adminRole);
+        UserEntity superUser = createUserEntity("superuser", "superuser123", superUserRole);
+        UserEntity user = createUserEntity("user", "user123", userRole);
 
-        UserEntity superUser = new UserEntity();
-        superUser.setUsername("superuser");
-        superUser.setPassword(passwordEncoder.encode("superuser123"));
-        superUser.setRoles(new HashSet<>(Arrays.asList(superUserRole)));
+        userRepository.saveAll(Arrays.asList(admin, superUser, user));
+    }
 
+    private UserEntity createUserEntity(String username, String password, RoleEntity role) {
         UserEntity user = new UserEntity();
-        user.setUsername("user");
-        user.setPassword(passwordEncoder.encode("user123"));
-        user.setRoles(new HashSet<>(Arrays.asList(userRole)));
-
-        userRepository.save(admin);
-        userRepository.save(superUser);
-        userRepository.save(user);
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRoles(new HashSet<>(Arrays.asList(role)));
+        return user;
     }
 
     private RoleEntity ensureRoleExists(String roleName) {
@@ -57,6 +55,5 @@ public class UserService {
             return newRole;
         });
     }
-
 }
 

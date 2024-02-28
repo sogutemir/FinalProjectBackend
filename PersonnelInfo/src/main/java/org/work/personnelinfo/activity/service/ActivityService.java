@@ -21,17 +21,16 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ActivityService {
-
     private final ActivityRepository activityRepository;
     private final ResourceFileService resourceFileService;
     private final PersonelRepository personelRepository;
     private final ActivityMapper activityMapper;
 
+    private static final String NULL_ID_MESSAGE = "%sId cannot be null";
+
     @Transactional(readOnly = true)
     public ActivityDTO getActivityById(Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Id cannot be null");
-        }
+        validateNotNull(id, "Activity");
         return activityRepository.findById(id)
                 .map(activityMapper::modelToDTO)
                 .orElseThrow(() -> new IllegalArgumentException("Activity not found with id: " + id));
@@ -39,9 +38,7 @@ public class ActivityService {
 
     @Transactional(readOnly = true)
     public List<ActivityDTO> getActivitiesByPersonelId(Long personelId) {
-        if (personelId == null) {
-            throw new IllegalArgumentException("PersonelId cannot be null");
-        }
+        validateNotNull(personelId, "Personel");
         return activityRepository.findByPersonelId(personelId)
                 .stream()
                 .map(activityMapper::modelToDTO)
@@ -50,62 +47,69 @@ public class ActivityService {
 
     @Transactional
     public ActivityDTO addActivity(ActivityDTO activityDTO, MultipartFile file) throws IOException {
-        if (activityDTO == null || activityDTO.getPersonelId() == null) {
-            throw new IllegalArgumentException("ActivityDTO or personelId cannot be null");
-        }
+        validateNotNull(activityDTO, "ActivityDTO");
+        validateNotNull(activityDTO.getPersonelId(), "Personel");
 
-        ActivityEntity activityEntity = activityMapper.dtoToModel(activityDTO);
-
-        PersonelEntity personelEntity = personelRepository.findById(activityDTO.getPersonelId())
-                .orElseThrow(() -> new IllegalArgumentException("Personel not found with id: " + activityDTO.getPersonelId()));
-
-        activityEntity.setPersonel(personelEntity);
-
-        activityEntity = activityRepository.save(activityEntity);
-
-        if (file != null){
-            resourceFileService.uploadFile(file, activityEntity);
-        }
+        ActivityEntity activityEntity = mapAndSaveActivity(activityDTO);
+        handleFileUpload(file, activityEntity);
 
         return activityMapper.modelToDTO(activityEntity);
     }
 
     @Transactional
     public ActivityDTO updateActivity(Long activityId, ActivityDTO activityDTO, MultipartFile file) throws IOException {
-        if (activityId == null || activityDTO == null) {
-            throw new IllegalArgumentException("ActivityId or ActivityDTO cannot be null");
-        }
+        validateNotNull(activityId, "Activity");
+        validateNotNull(activityDTO, "ActivityDTO");
 
         ActivityEntity existingActivityEntity = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException("Activity not found with id: " + activityId));
-
         activityMapper.updateModel(activityDTO, existingActivityEntity);
 
-        if (file != null && !file.isEmpty()) {
-            if (existingActivityEntity.getResourceFile() != null) {
-                resourceFileService.deleteFile(existingActivityEntity.getResourceFile().getId());
-            }
-            resourceFileService.uploadFile(file, existingActivityEntity);
-        }
+        handleFileProcessing(file, existingActivityEntity);
 
         ActivityEntity updatedActivityEntity = activityRepository.save(existingActivityEntity);
-
         return activityMapper.modelToDTO(updatedActivityEntity);
     }
 
     @Transactional
     public void deleteActivity(Long activityId) throws FileNotFoundException {
-        if (activityId == null) {
-            throw new IllegalArgumentException("ActivityId cannot be null");
-        }
+        validateNotNull(activityId, "Activity");
 
         ActivityEntity activityEntity = activityRepository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException("Activity not found with id: " + activityId));
 
-        if(activityEntity.getResourceFile() != null) {
+        if (activityEntity.getResourceFile() != null) {
             resourceFileService.deleteFile(activityEntity.getResourceFile().getId());
         }
-
         activityRepository.delete(activityEntity);
+    }
+
+    private void validateNotNull(Object object, String name) {
+        if (object == null) {
+            throw new IllegalArgumentException(String.format(NULL_ID_MESSAGE, name));
+        }
+    }
+
+    private ActivityEntity mapAndSaveActivity(ActivityDTO activityDTO) {
+        ActivityEntity activityEntity = activityMapper.dtoToModel(activityDTO);
+        PersonelEntity personelEntity = personelRepository.findById(activityDTO.getPersonelId())
+                .orElseThrow(() -> new IllegalArgumentException("Personel not found with id: " + activityDTO.getPersonelId()));
+        activityEntity.setPersonel(personelEntity);
+        return activityRepository.save(activityEntity);
+    }
+
+    private void handleFileUpload(MultipartFile file, ActivityEntity activityEntity) throws IOException {
+        if (file != null) {
+            resourceFileService.saveFile(file, activityEntity);
+        }
+    }
+
+    private void handleFileProcessing(MultipartFile file, ActivityEntity existingActivityEntity) throws IOException {
+        if (file != null && !file.isEmpty()) {
+            if (existingActivityEntity.getResourceFile() != null) {
+                resourceFileService.deleteFile(existingActivityEntity.getResourceFile().getId());
+            }
+            resourceFileService.saveFile(file, existingActivityEntity);
+        }
     }
 }

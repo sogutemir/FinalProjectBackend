@@ -14,7 +14,6 @@ import org.work.personnelinfo.admin.Service.UserService;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
     private final JwtUtil jwtUtil;
     private final UserService userService;
 
@@ -26,21 +25,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         JwtFilterUtil jwtFilterUtil = new JwtFilterUtil(jwtUtil);
-
-        http
-                .authorizeRequests(authorizeRequests ->
+        disableUnnecessaryHttpSecurityFeatures(http);
+        http.authorizeRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/user/login").permitAll()
                                 .requestMatchers("/personel/admin/**").hasRole("ADMIN")
-                                .requestMatchers("/user/**").hasAnyRole("ADMIN", "SUPERUSER", "USER") // Adjusted as per requirements
+                                .requestMatchers("/user/**").hasAnyRole("ADMIN", "SUPERUSER", "USER")
                                 .anyRequest().authenticated()
                 )
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
-                .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtFilterUtil, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
+    }
+
+    private void disableUnnecessaryHttpSecurityFeatures(HttpSecurity http) throws Exception {
+        http.httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable);
     }
 
     @Bean

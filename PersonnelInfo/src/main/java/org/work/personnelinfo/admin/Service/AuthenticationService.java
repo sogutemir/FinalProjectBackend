@@ -16,16 +16,13 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
-
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-    public String login(UserDTO entity) throws Exception{
-        if (entity == null || entity.getUsername() == null || entity.getUsername().isEmpty()
-                || entity.getPassword() == null || entity.getPassword().isEmpty()) {
-            throw new Exception("Invalid request");
-        }
+    public String login(UserDTO entity) throws Exception {
+        validateUserDTO(entity);
+
         UserEntity account = userRepository.findByUsername(entity.getUsername());
         if (account == null) {
             throw new Exception("User not found");
@@ -39,4 +36,10 @@ public class AuthenticationService {
         return jwtUtil.generateToken(entity.getUsername(), roles);
     }
 
+    private void validateUserDTO(UserDTO entity) throws Exception {
+        if (entity == null || entity.getUsername() == null || entity.getUsername().isEmpty()
+                || entity.getPassword() == null || entity.getPassword().isEmpty()) {
+            throw new Exception("Invalid request");
+        }
+    }
 }

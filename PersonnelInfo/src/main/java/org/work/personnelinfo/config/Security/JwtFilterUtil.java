@@ -17,50 +17,50 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class JwtFilterUtil extends OncePerRequestFilter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtFilterUtil.class);
+    private static final String BEARER = "Bearer ";
+    private static final int BEARER_LENGTH = 7;
 
     private final JwtUtil jwtUtil;
-    private static final Logger logger = LoggerFactory.getLogger(JwtFilterUtil.class);
 
     public JwtFilterUtil(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        String authorizationHeader = request.getHeader("Authorization");
 
-        String header = request.getHeader("Authorization");
-
-        if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
-            try {
-                Claims claims = Jwts.parserBuilder()
-                        .setSigningKey(jwtUtil.getKey())
-                        .build()
-                        .parseClaimsJws(token)
-                        .getBody();
-
-                @SuppressWarnings("unchecked")
-                List<String> roles = (List<String>) claims.get("roles");
-                List<GrantedAuthority> authorities = roles.stream()
-                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                        .collect(Collectors.toList());
-
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(claims.getSubject(), null, authorities);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (ExpiredJwtException e) {
-                logger.warn("Request to parse expired JWT : {} failed : {}", token, e.getMessage());
-            } catch (UnsupportedJwtException e) {
-                logger.warn("Request to parse unsupported JWT : {} failed : {}", token, e.getMessage());
-            } catch (MalformedJwtException e) {
-                logger.warn("Request to parse invalid JWT : {} failed : {}", token, e.getMessage());
-            } catch (SignatureException e) {
-                logger.warn("Request to parse JWT with invalid signature : {} failed : {}", token, e.getMessage());
-            } catch (IllegalArgumentException e) {
-                logger.warn("Request to parse empty or null JWT : {} failed : {}", token, e.getMessage());
-            }
+        if (authorizationHeader != null && authorizationHeader.startsWith(BEARER)) {
+            String rawToken = authorizationHeader.substring(BEARER_LENGTH);
+            authenticateWithJwtToken(rawToken);
         }
-
         filterChain.doFilter(request, response);
+    }
+
+    private void authenticateWithJwtToken(String rawToken) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(jwtUtil.getKey())
+                    .build()
+                    .parseClaimsJws(rawToken)
+                    .getBody();
+
+            @SuppressWarnings("unchecked")
+            List<String> roles = (List<String>) claims.get("roles");
+
+            List<GrantedAuthority> authorities = roles.stream()
+                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                    .collect(Collectors.toList());
+
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(claims.getSubject(), null, authorities);
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException
+                 | SignatureException | IllegalArgumentException e) {
+            LOGGER.warn("Request to parse JWT : {} failed : {}", rawToken, e.getMessage());
+        }
     }
 }

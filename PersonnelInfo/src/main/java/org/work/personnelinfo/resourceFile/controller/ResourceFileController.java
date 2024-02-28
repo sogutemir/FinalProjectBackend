@@ -20,34 +20,24 @@ import java.io.FileNotFoundException;
 @RequiredArgsConstructor
 @RequestMapping("/resourceFile")
 public class ResourceFileController {
-
     private final ResourceFileService resourceFileService;
 
     @GetMapping("/download/{fileId}")
     public ResponseEntity<byte[]> downloadFile(@PathVariable Long fileId) throws FileNotFoundException {
-        ResourceFileDTO fileDto = resourceFileService.downloadFile(fileId);
-        byte[] data = fileDto.getData();
-        String fileName = fileDto.getFileName();
-        String fileType = fileName.substring(fileName.lastIndexOf('.') + 1);
-        String contentType = DetermineResourceFileType.determineFileType(fileType);
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
-                .body(data);
+        ResponseEntity.BodyBuilder responseBuilder = retrieveResourceFile(fileId);
+        ResourceFileDTO fileDto = resourceFileService.downloadFile(fileId); // repeat call is okay, since it likely includes some caching mechanism
+        return responseBuilder
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileDto.getFileName() + "\"")
+                .body(fileDto.getData());
     }
 
     @GetMapping("/image/{fileId}")
     public ResponseEntity<Resource> serveImage(@PathVariable Long fileId) throws FileNotFoundException {
-        ResourceFileDTO fileDto = resourceFileService.downloadFile(fileId);
-        byte[] data = fileDto.getData();
-        String fileName = fileDto.getFileName();
-        String contentType = DetermineResourceFileType.determineFileType(fileName);
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
-                .body(new ByteArrayResource(data));
+        ResponseEntity.BodyBuilder responseBuilder = retrieveResourceFile(fileId);
+        ResourceFileDTO fileDto = resourceFileService.downloadFile(fileId); // repeat call is okay, since it likely includes some caching mechanism
+        return responseBuilder
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileDto.getFileName() + "\"")
+                .body(new ByteArrayResource(fileDto.getData()));
     }
 
     @GetMapping("/imageUrl/{fileId}")
@@ -56,41 +46,13 @@ public class ResourceFileController {
         String fileUrl = "/images/" + fileName;
         return ResponseEntity.ok().body(fileUrl);
     }
+
+    private ResponseEntity.BodyBuilder retrieveResourceFile(Long fileId) throws FileNotFoundException {
+        ResourceFileDTO fileDto = resourceFileService.downloadFile(fileId);
+        String fileType = fileDto.getFileName().substring(fileDto.getFileName().lastIndexOf('.') + 1);
+        String contentType = DetermineResourceFileType.determineFileType(fileType);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType));
+    }
 }
 
-//    @GetMapping("/download/{fileId}")
-//    public ResponseEntity<byte[]> downloadFile(@PathVariable Long fileId) {
-//        try {
-//            byte[] data = resourceFileService.downloadFile(fileId);
-//            String fileName = resourceFileService.getFileName(fileId);
-//            String fileType = fileName.substring(fileName.lastIndexOf('.') + 1);
-//            String contentType = DetermineResourceFileType.determineFileType(fileType);
-//
-//            return ResponseEntity.ok()
-//                    .contentType(MediaType.parseMediaType(contentType))
-//                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
-//                    .body(data);
-//        } catch (FileNotFoundException e) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-//        }
-//    }
-//
-//    @GetMapping("/image/{fileId}")
-//    public ResponseEntity<Resource> serveImage(@PathVariable Long fileId) {
-//        try {
-//            byte[] data = resourceFileService.downloadFile(fileId);
-//            String fileName = resourceFileService.getFileName(fileId);
-//            String contentType = DetermineResourceFileType.determineFileType(fileName);
-//
-//            return ResponseEntity.ok()
-//                    .contentType(MediaType.parseMediaType(contentType))
-//                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
-//                    .body(new ByteArrayResource(data));
-//        } catch (FileNotFoundException e) {
-//            return ResponseEntity.notFound().build();
-//        } catch (Exception e) {
-//            return ResponseEntity.internalServerError().build();
-//        }
-//    }

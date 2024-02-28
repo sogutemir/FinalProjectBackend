@@ -16,27 +16,19 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class EducationService {
-
     private final EducationRepository educationRepository;
     private final EducationMapper educationMapper;
     private final PersonelRepository personelRepository;
 
-
     @Transactional(readOnly = true)
     public EducationDTO getEducationById(Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Id cannot be null");
-        }
-        return educationRepository.findById(id)
-                .map(educationMapper::modelToDTO)
-                .orElseThrow(() -> new IllegalArgumentException("Education not found with id: " + id));
+        assertNonNull(id, "Id cannot be null");
+        return educationMapper.modelToDTO(getEducationFromDB(id));
     }
 
     @Transactional(readOnly = true)
     public List<EducationDTO> getEducationsByPersonelId(Long personelId) {
-        if (personelId == null) {
-            throw new IllegalArgumentException("PersonelId cannot be null");
-        }
+        assertNonNull(personelId, "PersonelId cannot be null");
         return educationRepository.findByPersonelId(personelId)
                 .stream()
                 .map(educationMapper::modelToDTO)
@@ -45,44 +37,42 @@ public class EducationService {
 
     @Transactional
     public EducationDTO addEducation(EducationDTO educationDTO) {
-        if (educationDTO == null || educationDTO.getPersonelId() == null) {
-            throw new IllegalArgumentException("EducationDTO or personelId cannot be null");
-        }
-
+        assertNonNull(educationDTO, "EducationDTO cannot be null");
+        assertNonNull(educationDTO.getPersonelId(), "personalId cannot be null");
         EducationEntity educationEntity = educationMapper.dtoToModel(educationDTO);
-        PersonelEntity personelEntity = personelRepository.findById(educationDTO.getPersonelId())
-                .orElseThrow(() -> new IllegalArgumentException("Personel not found with id: " + educationDTO.getPersonelId()));
-
+        PersonelEntity personelEntity = getPersonelFromDB(educationDTO.getPersonelId());
         educationEntity.setPersonel(personelEntity);
         educationEntity = educationRepository.save(educationEntity);
-
         return educationMapper.modelToDTO(educationEntity);
     }
 
     @Transactional
     public EducationDTO updateEducation(Long educationId, EducationDTO educationDTO) {
-        if (educationId == null || educationDTO == null) {
-            throw new IllegalArgumentException("EducationId or EducationDTO cannot be null");
-        }
-
-        EducationEntity existingEducationEntity = educationRepository.findById(educationId)
-                .orElseThrow(() -> new IllegalArgumentException("Education not found with id: " + educationId));
-
+        assertNonNull(educationId, "EducationId cannot be null");
+        assertNonNull(educationDTO, "EducationDTO cannot be null");
+        EducationEntity existingEducationEntity = getEducationFromDB(educationId);
         educationMapper.updateModel(educationDTO, existingEducationEntity);
-
         return educationMapper.modelToDTO(existingEducationEntity);
     }
 
     @Transactional
-    public void deleteEducation(Long educationId){
-        if (educationId == null) {
-            throw new IllegalArgumentException("EducationId cannot be null");
-        }
-
-        EducationEntity educationEntity = educationRepository.findById(educationId)
-                .orElseThrow(() -> new IllegalArgumentException("Experience not found with id: " + educationId));
+    public void deleteEducation(Long educationId) {
+        assertNonNull(educationId, "EducationId cannot be null");
+        EducationEntity educationEntity = getEducationFromDB(educationId);
         educationRepository.delete(educationEntity);
     }
 
+    private void assertNonNull(Object object, String message) {
+        if (object == null) throw new IllegalArgumentException(message);
+    }
 
+    private EducationEntity getEducationFromDB(Long id) {
+        return educationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Education not found with id: " + id));
+    }
+
+    private PersonelEntity getPersonelFromDB(Long id) {
+        return personelRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Personel not found with id: " + id));
+    }
 }

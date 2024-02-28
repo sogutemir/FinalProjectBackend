@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import org.work.personnelinfo.personel.service.PersonelService;
 import org.springframework.web.multipart.MultipartFile;
 import org.work.personnelinfo.personel.dto.PersonelDTO;
-
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
@@ -24,7 +22,7 @@ public class PersonelController {
 
     @GetMapping("/all")
     public List<PersonelDTO> getAllPersonel() {
-        return personelService.getPersonelAll();
+        return personelService.getAllPersonel();
     }
 
     @PostMapping("/admin/add")
@@ -43,7 +41,7 @@ public class PersonelController {
 
     @DeleteMapping("admin/delete/{personelId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public void deletePersonel(@PathVariable Long personelId) throws FileNotFoundException {
+    public void deletePersonel(@PathVariable Long personelId) throws IOException {
         personelService.deletePersonel(personelId);
     }
 }
