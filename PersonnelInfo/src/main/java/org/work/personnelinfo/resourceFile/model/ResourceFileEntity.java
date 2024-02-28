@@ -28,7 +28,7 @@ public class ResourceFileEntity  {
     private String type;
 
     @Lob
-    @Column(name="resource_file_Data")
+    @Column(name="resource_file_Data", columnDefinition="LONGBLOB")
     private byte[] data;
 
     @Column(name = "upload_date")

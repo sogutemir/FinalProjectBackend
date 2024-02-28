@@ -19,7 +19,7 @@ public class ExperienceController {
         return experienceService.getExperienceById(id);
     }
 
-    @GetMapping("/{personelId}")
+    @GetMapping("getByPersonelId/{personelId}")
     public List<ExperienceDTO> getExperienceByPersonelId(@PathVariable Long personelId) {
         return experienceService.getExperiencesByPersonelId(personelId);
     }
