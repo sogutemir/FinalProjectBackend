@@ -1,11 +1,8 @@
 package org.work.personnelinfo.config.Security;
 
-import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -35,7 +32,7 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers("/user/login").permitAll()
                                 .requestMatchers("/personel/admin/**").hasRole("ADMIN")
-                                .requestMatchers("/user/**").hasAnyRole("SUPERUSER", "USER")
+                                .requestMatchers("/user/**").hasAnyRole("ADMIN", "SUPERUSER", "USER") // Adjusted as per requirements
                                 .anyRequest().authenticated()
                 )
                 .httpBasic(AbstractHttpConfigurer::disable)

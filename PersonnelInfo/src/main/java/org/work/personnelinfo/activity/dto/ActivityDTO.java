@@ -22,6 +22,10 @@ public class ActivityDTO  {
     private LocalDateTime uploadDate;
     private String fileName;
 
+    public ActivityDTO(Long personelId) {
+        this.personelId = personelId;
+    }
+
     @NotNull
     private Long personelId;
 

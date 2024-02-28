@@ -1,13 +1,12 @@
 package org.work.personnelinfo.file.controller;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.work.personnelinfo.file.dto.FileDTO;
 import org.work.personnelinfo.file.service.FileService;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
@@ -19,72 +18,30 @@ public class FileController {
     private final FileService fileService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getFileById(@PathVariable Long id) {
-        try {
-            FileDTO fileDTO = fileService.getFileById(id);
-            return new ResponseEntity<>(fileDTO, HttpStatus.OK);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
-        }
+    public FileDTO getFileById(@PathVariable Long id) {
+        return fileService.getFileById(id);
     }
 
     @GetMapping("getByPersonelId/{personelId}")
-    public ResponseEntity<?> getFilesByPersonelId(@PathVariable(required = false) Long personelId) {
-        try {
-            List<FileDTO> fileDTO = fileService.getFileByPersonelId(personelId);
-            if (fileDTO.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No files found for personelId: " + personelId);
-            }
-            return new ResponseEntity<>(fileDTO, HttpStatus.OK);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
-        }
+    public List<FileDTO> getFilesByPersonelId(@PathVariable(required = false) Long personelId) {
+        return fileService.getFileByPersonelId(personelId);
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addFile(@RequestParam(value = "file") MultipartFile file,
-                                     @ModelAttribute FileDTO fileDTO) {
-        try {
-            FileDTO createdFile = fileService.addFile(fileDTO, file);
-            return new ResponseEntity<>(createdFile, HttpStatus.CREATED);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There was an error loading the file: " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while adding staff: " + e.getMessage());
-        }
+    public FileDTO addFile(@RequestParam(value = "file") MultipartFile file,
+                           @ModelAttribute FileDTO fileDTO) throws IOException {
+        return fileService.addFile(fileDTO, file);
     }
 
     @PutMapping("/update/{fileId}")
-    public ResponseEntity<?> updateFile(@PathVariable Long fileId,
-                                        @RequestParam(value = "file", required = false) MultipartFile file,
-                                        @ModelAttribute FileDTO fileDTO) {
-        try {
-            FileDTO updatedFile = fileService.updateFile(fileId, fileDTO, file);
-            return new ResponseEntity<>(updatedFile, HttpStatus.OK);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There was an error loading the file: " + e.getMessage());
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while updating staff: " + e.getMessage());
-        }
+    public FileDTO updateFile(@PathVariable Long fileId,
+                              @RequestParam(value = "file", required = false) MultipartFile file,
+                              @ModelAttribute FileDTO fileDTO) throws IOException {
+        return fileService.updateFile(fileId, fileDTO, file);
     }
 
     @DeleteMapping("/delete/{fileId}")
-    public ResponseEntity<?> deleteFile(@PathVariable Long fileId) {
-        try {
-            fileService.deleteFile(fileId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while deleting staff: " + e.getMessage());
-        }
+    public void deleteFile(@PathVariable Long fileId) throws FileNotFoundException {
+        fileService.deleteFile(fileId);
     }
 }

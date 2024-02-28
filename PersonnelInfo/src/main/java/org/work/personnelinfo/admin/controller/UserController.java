@@ -22,7 +22,7 @@ public class UserController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserDTO entity){
+    public ResponseEntity<?> login(@RequestBody UserDTO entity) throws Exception {
         String token = authenticationService.login(entity);
         if (token != null) {
             return ResponseEntity.ok(token);
