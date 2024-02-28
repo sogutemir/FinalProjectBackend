@@ -98,12 +98,14 @@ public class ActivityService {
         return activityRepository.save(activityEntity);
     }
 
+    //ResourceFileServise taşınacak
     private void handleFileUpload(MultipartFile file, ActivityEntity activityEntity) throws IOException {
         if (file != null) {
             resourceFileService.saveFile(file, activityEntity);
         }
     }
 
+    //ResourceFileServise taşınacak
     private void handleFileProcessing(MultipartFile file, ActivityEntity existingActivityEntity) throws IOException {
         if (file != null && !file.isEmpty()) {
             if (existingActivityEntity.getResourceFile() != null) {

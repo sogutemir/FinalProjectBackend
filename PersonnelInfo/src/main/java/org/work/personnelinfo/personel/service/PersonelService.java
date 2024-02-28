@@ -65,6 +65,7 @@ public class PersonelService {
         personelRepository.delete(personelEntity);
     }
 
+    //ResourceFileServise taşınacak
     private void handleFile(ProcessType processType, MultipartFile file, PersonelEntity personelEntity) throws IOException {
         if (file != null && !file.isEmpty()) {
             if (processType == ProcessType.DELETE && personelEntity.getResourceFile() != null) {
