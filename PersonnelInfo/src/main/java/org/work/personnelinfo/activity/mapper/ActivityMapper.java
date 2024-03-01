@@ -1,13 +1,10 @@
 package org.work.personnelinfo.activity.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 import org.work.personnelinfo.activity.dto.ActivityDTO;
 import org.work.personnelinfo.activity.model.ActivityEntity;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface ActivityMapper {
 
     @Mapping(target = "personelId", source = "personel.id")
@@ -15,8 +12,11 @@ public interface ActivityMapper {
     ActivityDTO modelToDTO(ActivityEntity activityEntity);
 
     @Mapping(target = "personel.id", source = "personelId")
+    @Mapping(target = "resourceFile", ignore = true)
     ActivityEntity dtoToModel(ActivityDTO activityDTO);
 
     @Mapping(target = "personel.id", source = "personelId")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "resourceFile", ignore = true)
     void updateModel(ActivityDTO activityDTO,@MappingTarget ActivityEntity activityEntity);
 }

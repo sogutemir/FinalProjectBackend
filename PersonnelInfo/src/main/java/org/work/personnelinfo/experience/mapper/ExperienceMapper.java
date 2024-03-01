@@ -1,13 +1,10 @@
 package org.work.personnelinfo.experience.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 import org.work.personnelinfo.experience.dto.ExperienceDTO;
 import org.work.personnelinfo.experience.model.ExperienceEntity;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface ExperienceMapper {
 
     @Mapping(target = "personelId", source = "personel.id")
@@ -18,5 +15,6 @@ public interface ExperienceMapper {
     ExperienceEntity dtoToModel(ExperienceDTO experienceDTO);
 
     @Mapping(target = "personel.id", source = "personelId")
+    @Mapping(target = "id", ignore = true)
     void updateModel(ExperienceDTO experienceDTO,@MappingTarget ExperienceEntity experienceEntity);
 }

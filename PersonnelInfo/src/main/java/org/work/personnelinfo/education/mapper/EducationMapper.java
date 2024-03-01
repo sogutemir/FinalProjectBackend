@@ -1,13 +1,10 @@
 package org.work.personnelinfo.education.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 import org.work.personnelinfo.education.dto.EducationDTO;
 import org.work.personnelinfo.education.model.EducationEntity;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface EducationMapper {
 
     @Mapping(target = "personelId", source = "personel.id")
@@ -20,5 +17,6 @@ public interface EducationMapper {
 
     @Mapping(target = "personel.id", source = "personelId")
     @Mapping(target = "universtySchool", source = "universityName")
+    @Mapping(target = "id", ignore = true)
     void updateModel(EducationDTO educationDTO, @MappingTarget EducationEntity educationEntity);
 }

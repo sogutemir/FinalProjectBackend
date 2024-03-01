@@ -16,6 +16,7 @@ public class FileDTO  {
     private String fileType;
     private String section;
     private LocalDateTime uploadDate;
+    private Long fileId;
 
     @NotNull
     private Long personelId;
