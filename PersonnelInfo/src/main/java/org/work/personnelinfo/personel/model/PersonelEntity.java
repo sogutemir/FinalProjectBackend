@@ -6,6 +6,7 @@ import lombok.*;
 import org.work.personnelinfo.activity.model.ActivityEntity;
 import org.work.personnelinfo.base.model.BaseEntity;
 import org.work.personnelinfo.education.model.EducationEntity;
+import org.work.personnelinfo.experience.model.ExperienceEntity;
 import org.work.personnelinfo.file.model.FileEntity;
 import org.work.personnelinfo.personel.validation.ValidTCIDNo;
 import org.work.personnelinfo.project.model.ProjectEntity;
@@ -126,6 +127,9 @@ public class PersonelEntity extends BaseEntity {
 
     @OneToMany(mappedBy = "personel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ActivityEntity> personel_activity;
+
+    @OneToMany(mappedBy = "personel", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ExperienceEntity> personel_experience;
 
     @OneToMany(mappedBy = "personel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FileEntity> personel_file;

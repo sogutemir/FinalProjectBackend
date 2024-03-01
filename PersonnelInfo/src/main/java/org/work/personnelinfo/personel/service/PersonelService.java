@@ -51,11 +51,28 @@ public class PersonelService {
 
     @Transactional
     public PersonelDTO updatePersonel(Long personelId, PersonelDTO personelDTO, MultipartFile file) throws IOException {
-        PersonelEntity existingPersonelEntity = getPersonelEntityById(Objects.requireNonNull(personelId, "PersonelId cannot be null"));
-        personelMapper.updateModel(Objects.requireNonNull(personelDTO, "PersonelDTO cannot be null"), existingPersonelEntity);
-        handleFile(ProcessType.DELETE, file, existingPersonelEntity);
+        Objects.requireNonNull(personelId, "PersonelId cannot be null");
+        Objects.requireNonNull(personelDTO, "PersonelDTO cannot be null");
+
+        PersonelEntity existingPersonelEntity = getPersonelEntityById(personelId);
+        personelMapper.updateModel(personelDTO, existingPersonelEntity);
+
+        handleOldFileIfExistsAndNewFile(existingPersonelEntity, file);
+        personelRepository.flush();
+
         PersonelEntity updatedPersonelEntity = personelRepository.save(existingPersonelEntity);
         return personelMapper.modelToDTO(updatedPersonelEntity);
+    }
+
+    private void handleOldFileIfExistsAndNewFile(PersonelEntity existingPersonelEntity, MultipartFile file) throws IOException {
+        if (file != null && !file.isEmpty()) {
+            if (existingPersonelEntity.getResourceFile() != null) {
+                Long oldFileId = existingPersonelEntity.getResourceFile().getId();
+                resourceFileService.updateFile(oldFileId, file);
+            } else {
+                resourceFileService.saveFile(file, existingPersonelEntity);
+            }
+        }
     }
 
     @Transactional

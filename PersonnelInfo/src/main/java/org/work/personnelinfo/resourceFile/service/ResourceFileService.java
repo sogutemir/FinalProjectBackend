@@ -28,6 +28,7 @@ public class ResourceFileService {
     private static final String FILE_EMPTY = "File is empty";
     private static final String FILE_NOT_FOUND_MSG = "File not found with id: ";
     private static final String DELETION_ERROR_MSG = "Error occurred while deleting the file with id: ";
+    public static final String UPDATED_MSG = "Updated file in DB with name: %s";
 
     @Transactional
     public String saveFile(MultipartFile file, BaseEntity entity) throws IOException {
@@ -43,6 +44,12 @@ public class ResourceFileService {
         if (entity == null) {
             throw new IllegalArgumentException(ENTITY_CANNOT_BE_NULL);
         }
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException(FILE_EMPTY);
+        }
+    }
+
+    private void validateFile(MultipartFile file) {
         if (file.isEmpty()) {
             throw new IllegalArgumentException(FILE_EMPTY);
         }
@@ -65,6 +72,19 @@ public class ResourceFileService {
         return fileRepository.findById(fileId)
                 .map(ResourceFileEntity::getName)
                 .orElseThrow(() -> new FileNotFoundException(FILE_NOT_FOUND_MSG + fileId));
+    }
+
+    @Transactional
+    public String updateFile(Long id, MultipartFile file) throws IOException {
+        validateFile(file);
+        ResourceFileEntity fileEntity = fileRepository.findById(id)
+                .orElseThrow(() -> new FileNotFoundException(String.format(FILE_NOT_FOUND_MSG, id)));
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        fileEntity.setName(fileName);
+        fileEntity.setType(file.getContentType());
+        fileEntity.setData(ResourceFileUtils.compressBytes(file.getBytes()));
+        fileRepository.save(fileEntity);
+        return String.format(UPDATED_MSG, fileName);
     }
 
     @Transactional(readOnly = true)
