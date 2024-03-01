@@ -15,7 +15,6 @@ public interface PersonelMapper {
 
     @Mappings({
             @Mapping(target = "photoId", source = "resourceFile.id"),
-            @Mapping(target = "employmentStartDate", source = "startDateOfEmployment"),
     })
     PersonelDTO modelToDTO(PersonelEntity personelEntity);
 

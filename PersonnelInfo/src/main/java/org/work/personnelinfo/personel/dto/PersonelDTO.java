@@ -17,6 +17,7 @@ public class PersonelDTO  {
     private String identityNumber;
     private String academicTitle;
     private LocalDate dateOfBirth;
+    private Boolean isMale;
     private String email;
     private String phone;
     private String emergencyContact;
@@ -28,13 +29,18 @@ public class PersonelDTO  {
     private String title;
     private String teamName;
     private String department;
+    private String workingType;
     private String task;
+    private String cadre;
     private String personnelType;
     private String workStatus;
-    private String serviceUsage;
+    private Boolean isServiceUsage;
+    private String mentor;
+    private String projectInProgress;
+    private String vehiclePlate;
     private String internalNumber;
     private String roomNumber;
     private Long photoId;
-    private LocalDateTime employmentStartDate;
+    private LocalDate startDateOfEmployment;
 
 }

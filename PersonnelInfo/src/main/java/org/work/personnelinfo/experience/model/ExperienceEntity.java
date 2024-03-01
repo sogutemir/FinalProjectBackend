@@ -11,8 +11,6 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @Setter
-@EqualsAndHashCode(of = "id")
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "personel_experience")

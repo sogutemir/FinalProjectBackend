@@ -10,10 +10,7 @@ import org.work.personnelinfo.experience.model.ExperienceEntity;
 import org.work.personnelinfo.file.model.FileEntity;
 import org.work.personnelinfo.personel.validation.ValidTCIDNo;
 import org.work.personnelinfo.project.model.ProjectEntity;
-
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -53,6 +50,10 @@ public class PersonelEntity extends BaseEntity {
     @Email
     private String email;
 
+    @NotNull
+    @Column(name = "gender")
+    private Boolean isMale;
+
     @NotBlank(message = "Phone number is required")
     @Column(name = "phone")
     private String phone;
@@ -73,18 +74,23 @@ public class PersonelEntity extends BaseEntity {
     @Column(name = "residence_address")
     private String residenceAddress;
 
+    @NotNull
     @Column(name = "start_date_of_employment")
-    private LocalDateTime startDateOfEmployment;
-    @PrePersist
-    protected void onCreate() {
-        startDateOfEmployment = LocalDateTime.now();
-    }
+    private LocalDate startDateOfEmployment;
+
+    @Column(name = "working_type")
+    private String workingType;
+
+    @NotBlank(message = "Mentor is required")
+    private String mentor;
 
     @NotBlank(message = "Registration number is required")
     private String registrationNo;
 
     @NotBlank(message = "Department information is required")
     private String department;
+
+    private String cadre;
 
     @NotBlank(message = "Position information is required")
     @Column(name = "position")
@@ -106,12 +112,18 @@ public class PersonelEntity extends BaseEntity {
     @Column(name = "personnel_type")
     private String personnelType;
 
+    @Column(name="project_in_progress")
+    private String projectInProgress;
+
+    @Column(name = "vehicle_plate")
+    private String vehiclePlate;
+
     @NotBlank(message = "Work status information is required")
     @Column(name = "work_status")
     private String workStatus;
 
     @Column(name = "service_usage")
-    private String serviceUsage;
+    private Boolean isServiceUsage;
 
     @Column(name = "internal_number")
     private String internalNumber;
