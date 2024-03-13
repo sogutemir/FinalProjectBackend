@@ -1,10 +1,10 @@
 package org.work.personnelinfo.personel.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.work.personnelinfo.base.service.BaseService;
 import org.work.personnelinfo.personel.dto.PersonelDTO;
 import org.work.personnelinfo.personel.mapper.PersonelMapper;
 import org.work.personnelinfo.personel.repository.PersonelRepository;
@@ -17,12 +17,32 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
-public class PersonelService {
-    private static final String PERSONEL_NOT_FOUND_WITH_ID = "Personel not found with id: ";
-    private final PersonelRepository personelRepository;
+public class PersonelService extends BaseService<PersonelEntity, PersonelDTO, PersonelRepository> {
+
     private final PersonelMapper personelMapper;
-    private final ResourceFileService resourceFileService;
+    private static final String PERSONEL_NOT_FOUND_WITH_ID = "Personel not found with id: ";
+
+    public PersonelService(PersonelRepository personelRepository, ResourceFileService resourceFileService, PersonelMapper personelMapper) {
+        super(personelRepository, resourceFileService); // Call to the base class constructor
+        this.personelMapper = personelMapper;
+    }
+
+    @Override
+    protected PersonelDTO convertToDto(PersonelEntity entity) {
+        return personelMapper.modelToDTO(entity);
+    }
+
+    @Override
+    protected PersonelEntity convertToEntity(PersonelDTO dto) {
+        return personelMapper.dtoToModel(dto);
+    }
+
+    @Override
+    protected void updateEntity(PersonelDTO dto, PersonelEntity entity) {
+        personelMapper.updateModel(dto, entity);
+    }
+
+
 
     private enum ProcessType {
         UPLOAD, DELETE
@@ -35,7 +55,7 @@ public class PersonelService {
 
     @Transactional(readOnly = true)
     public List<PersonelDTO> getAllPersonel() {
-        List<PersonelEntity> personelEntities = personelRepository.findAll();
+        List<PersonelEntity> personelEntities = repository.findAll();
         return personelEntities.stream()
                 .map(personelMapper::modelToDTO)
                 .collect(Collectors.toList());
@@ -45,7 +65,7 @@ public class PersonelService {
     public List<PersonelDTO> getNewPersonnel() {
         LocalDate oneMonthAgo = LocalDate.now().minusMonths(1);
         List<PersonelEntity> personelEntities =
-                personelRepository.findPersonnelWhoStartedWithinTheLastMonth(oneMonthAgo);
+                repository.findPersonnelWhoStartedWithinTheLastMonth(oneMonthAgo);
 
         return  personelEntities.stream()
                 .map(personelMapper::modelToDTO)
@@ -55,7 +75,7 @@ public class PersonelService {
     @Transactional
     public PersonelDTO addPersonel(PersonelDTO personelDTO, MultipartFile file) throws IOException {
         PersonelEntity newPersonelEntity = personelMapper.dtoToModel(Objects.requireNonNull(personelDTO, "PersonelDTO cannot be null"));
-        newPersonelEntity = personelRepository.save(newPersonelEntity);
+        newPersonelEntity = repository.save(newPersonelEntity);
         handleFile(ProcessType.UPLOAD, file, newPersonelEntity);
         return personelMapper.modelToDTO(newPersonelEntity);
     }
@@ -69,9 +89,9 @@ public class PersonelService {
         personelMapper.updateModel(personelDTO, existingPersonelEntity);
 
         handleOldFileIfExistsAndNewFile(existingPersonelEntity, file);
-        personelRepository.flush();
+        repository.flush();
 
-        PersonelEntity updatedPersonelEntity = personelRepository.save(existingPersonelEntity);
+        PersonelEntity updatedPersonelEntity = repository.save(existingPersonelEntity);
         return personelMapper.modelToDTO(updatedPersonelEntity);
     }
 
@@ -90,7 +110,7 @@ public class PersonelService {
     public void deletePersonel(Long personelId) throws IOException {
         PersonelEntity personelEntity = getPersonelEntityById(Objects.requireNonNull(personelId, "PersonelId cannot be null"));
         handleFile(ProcessType.DELETE, null, personelEntity);
-        personelRepository.delete(personelEntity);
+        repository.delete(personelEntity);
     }
 
     private void handleFile(ProcessType processType, MultipartFile file, PersonelEntity personelEntity) throws IOException {
@@ -103,6 +123,6 @@ public class PersonelService {
     }
 
     private PersonelEntity getPersonelEntityById(Long id) {
-        return personelRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(PERSONEL_NOT_FOUND_WITH_ID + id));
+        return repository.findById(id).orElseThrow(() -> new EntityNotFoundException(PERSONEL_NOT_FOUND_WITH_ID + id));
     }
 }

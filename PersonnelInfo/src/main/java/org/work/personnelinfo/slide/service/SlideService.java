@@ -1,10 +1,10 @@
 package org.work.personnelinfo.slide.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.work.personnelinfo.base.service.BaseService;
 import org.work.personnelinfo.resourceFile.service.ResourceFileService;
 import org.work.personnelinfo.slide.dto.SlideDTO;
 import org.work.personnelinfo.slide.mapper.SlideMapper;
@@ -17,11 +17,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
-public class SlideService {
-    private final SlideRepository slideRepository;
+public class SlideService extends BaseService<SlideEntity, SlideDTO, SlideRepository> {
+
     private final SlideMapper slideMapper;
-    private final ResourceFileService resourceFileService;
+
+    public SlideService(SlideRepository slideRepository,
+                        ResourceFileService resourceFileService,
+                        SlideMapper slideMapper) {
+        super(slideRepository, resourceFileService);
+        this.slideMapper = slideMapper;
+    }
 
     private static final String NULL_ID_ERROR = "Id cannot be null";
     private static final String NULL_SLIDE_DTO_ERROR = "slideDTO cannot be null";
@@ -29,7 +34,7 @@ public class SlideService {
 
     @Transactional(readOnly = true)
     public List<SlideDTO> getAllSlides() {
-        return slideRepository.findAll()
+        return repository.findAll()
                 .stream()
                 .map(slideMapper::modelToDTO)
                 .collect(Collectors.toList());
@@ -38,7 +43,7 @@ public class SlideService {
     @Transactional(readOnly = true)
     public SlideDTO getSlideById(Long id) {
         validateId(id);
-        return slideRepository.findById(id)
+        return repository.findById(id)
                 .map(slideMapper::modelToDTO)
                 .orElseThrow(() -> new IllegalArgumentException(SLIDE_NOT_FOUND_ERROR + id));
     }
@@ -47,7 +52,7 @@ public class SlideService {
     public SlideDTO addSlide(MultipartFile file, SlideDTO slideDTO) throws IOException {
         validateSlideDTO(slideDTO);
         SlideEntity slideEntity = slideMapper.dtoToModel(slideDTO);
-        slideEntity = slideRepository.save(slideEntity);
+        slideEntity = repository.save(slideEntity);
         if (file != null) {
             resourceFileService.saveFile(file, slideEntity);
         }
@@ -57,7 +62,7 @@ public class SlideService {
     @Transactional
     public SlideDTO updateSlide(Long slideId, SlideDTO slideDTO, MultipartFile file) throws IOException {
         validateSlideIdAndDTO(slideId, slideDTO);
-        SlideEntity existingSlideEntity = slideRepository.findById(slideId)
+        SlideEntity existingSlideEntity = repository.findById(slideId)
                 .orElseThrow(() -> new EntityNotFoundException(SLIDE_NOT_FOUND_ERROR + slideId));
         slideMapper.updateModel(slideDTO, existingSlideEntity);
         if (file != null && !file.isEmpty()) {
@@ -66,19 +71,19 @@ public class SlideService {
             }
             resourceFileService.saveFile(file, existingSlideEntity);
         }
-        SlideEntity updatedSlideEntity = slideRepository.save(existingSlideEntity);
+        SlideEntity updatedSlideEntity = repository.save(existingSlideEntity);
         return slideMapper.modelToDTO(updatedSlideEntity);
     }
 
     @Transactional
     public void deleteSlide(Long slideId) throws FileNotFoundException {
         validateId(slideId);
-        SlideEntity slideEntity = slideRepository.findById(slideId)
+        SlideEntity slideEntity = repository.findById(slideId)
                 .orElseThrow(() -> new EntityNotFoundException(SLIDE_NOT_FOUND_ERROR + slideId));
         if (slideEntity.getResourceFile() != null) {
             resourceFileService.deleteFile(slideEntity.getResourceFile().getId());
         }
-        slideRepository.delete(slideEntity);
+        repository.delete(slideEntity);
     }
 
     private void validateId(Long id) {
@@ -97,5 +102,21 @@ public class SlideService {
         if (slideId == null || slideDTO == null) {
             throw new IllegalArgumentException("SlideId or SlideDTO cannot be null");
         }
+    }
+
+    @Override
+    protected SlideDTO convertToDto(SlideEntity entity) {
+        return slideMapper.modelToDTO(entity);
+    }
+
+    @Override
+    protected SlideEntity convertToEntity(SlideDTO dto) {
+        validateSlideDTO(dto);
+        return slideMapper.dtoToModel(dto);
+    }
+
+    @Override
+    protected void updateEntity(SlideDTO dto, SlideEntity entity) {
+        slideMapper.updateModel(dto, entity);
     }
 }

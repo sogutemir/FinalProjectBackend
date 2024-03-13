@@ -1,7 +1,6 @@
 package org.work.personnelinfo.activity.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,6 +8,7 @@ import org.work.personnelinfo.activity.dto.ActivityDTO;
 import org.work.personnelinfo.activity.mapper.ActivityMapper;
 import org.work.personnelinfo.activity.model.ActivityEntity;
 import org.work.personnelinfo.activity.repository.ActivityRepository;
+import org.work.personnelinfo.base.service.BaseService;
 import org.work.personnelinfo.personel.model.PersonelEntity;
 import org.work.personnelinfo.personel.repository.PersonelRepository;
 import org.work.personnelinfo.resourceFile.service.ResourceFileService;
@@ -19,19 +19,26 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
-public class ActivityService {
-    private final ActivityRepository activityRepository;
-    private final ResourceFileService resourceFileService;
-    private final PersonelRepository personelRepository;
+public class ActivityService extends BaseService<ActivityEntity, ActivityDTO, ActivityRepository> {
+
     private final ActivityMapper activityMapper;
+    private final PersonelRepository personelRepository;
+
+    public ActivityService(ActivityRepository activityRepository,
+                           ResourceFileService resourceFileService,
+                           ActivityMapper activityMapper,
+                           PersonelRepository personelRepository) {
+        super(activityRepository, resourceFileService);
+        this.activityMapper = activityMapper;
+        this.personelRepository = personelRepository;
+    }
 
     private static final String NULL_ID_MESSAGE = "%sId cannot be null";
 
     @Transactional(readOnly = true)
     public ActivityDTO getActivityById(Long id) {
         validateNotNull(id, "Activity");
-        return activityRepository.findById(id)
+        return repository.findById(id)
                 .map(activityMapper::modelToDTO)
                 .orElseThrow(() -> new IllegalArgumentException("Activity not found with id: " + id));
     }
@@ -39,7 +46,7 @@ public class ActivityService {
     @Transactional(readOnly = true)
     public List<ActivityDTO> getActivitiesByPersonelId(Long personelId) {
         validateNotNull(personelId, "Personel");
-        return activityRepository.findByPersonelId(personelId)
+        return repository.findByPersonelId(personelId)
                 .stream()
                 .map(activityMapper::modelToDTO)
                 .collect(Collectors.toList());
@@ -61,13 +68,13 @@ public class ActivityService {
         validateNotNull(activityId, "Activity");
         validateNotNull(activityDTO, "ActivityDTO");
 
-        ActivityEntity existingActivityEntity = activityRepository.findById(activityId)
+        ActivityEntity existingActivityEntity = repository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException("Activity not found with id: " + activityId));
         activityMapper.updateModel(activityDTO, existingActivityEntity);
 
         handleFileProcessing(file, existingActivityEntity);
 
-        ActivityEntity updatedActivityEntity = activityRepository.save(existingActivityEntity);
+        ActivityEntity updatedActivityEntity = repository.save(existingActivityEntity);
         return activityMapper.modelToDTO(updatedActivityEntity);
     }
 
@@ -75,13 +82,13 @@ public class ActivityService {
     public void deleteActivity(Long activityId) throws FileNotFoundException {
         validateNotNull(activityId, "Activity");
 
-        ActivityEntity activityEntity = activityRepository.findById(activityId)
+        ActivityEntity activityEntity = repository.findById(activityId)
                 .orElseThrow(() -> new EntityNotFoundException("Activity not found with id: " + activityId));
 
         if (activityEntity.getResourceFile() != null) {
             resourceFileService.deleteFile(activityEntity.getResourceFile().getId());
         }
-        activityRepository.delete(activityEntity);
+        repository.delete(activityEntity);
     }
 
     private void validateNotNull(Object object, String name) {
@@ -95,17 +102,15 @@ public class ActivityService {
         PersonelEntity personelEntity = personelRepository.findById(activityDTO.getPersonelId())
                 .orElseThrow(() -> new IllegalArgumentException("Personel not found with id: " + activityDTO.getPersonelId()));
         activityEntity.setPersonel(personelEntity);
-        return activityRepository.save(activityEntity);
+        return repository.save(activityEntity);
     }
 
-    //ResourceFileServise taşınacak
     private void handleFileUpload(MultipartFile file, ActivityEntity activityEntity) throws IOException {
         if (file != null) {
             resourceFileService.saveFile(file, activityEntity);
         }
     }
 
-    //ResourceFileServise taşınacak
     private void handleFileProcessing(MultipartFile file, ActivityEntity existingActivityEntity) throws IOException {
         if (file != null && !file.isEmpty()) {
             if (existingActivityEntity.getResourceFile() != null) {
@@ -113,5 +118,26 @@ public class ActivityService {
             }
             resourceFileService.saveFile(file, existingActivityEntity);
         }
+    }
+
+    @Override
+    protected ActivityDTO convertToDto(ActivityEntity entity) {
+        return activityMapper.modelToDTO(entity);
+    }
+
+    @Override
+    protected ActivityEntity convertToEntity(ActivityDTO dto) {
+        validateNotNull(dto, "ActivityDTO");
+        validateNotNull(dto.getPersonelId(), "Personel");
+        PersonelEntity personelEntity = personelRepository.findById(dto.getPersonelId())
+                .orElseThrow(() -> new IllegalArgumentException("Personel not found with id: " + dto.getPersonelId()));
+        ActivityEntity entity = activityMapper.dtoToModel(dto);
+        entity.setPersonel(personelEntity);
+        return entity;
+    }
+
+    @Override
+    protected void updateEntity(ActivityDTO dto, ActivityEntity entity) {
+        activityMapper.updateModel(dto, entity);
     }
 }

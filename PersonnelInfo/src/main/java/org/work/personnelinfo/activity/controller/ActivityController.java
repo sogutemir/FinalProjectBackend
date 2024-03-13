@@ -40,6 +40,13 @@ public class ActivityController {
         return activityService.updateActivity(activityId, activityDTO, file);
     }
 
+    @PutMapping("/updateNew/{activityId}")
+    public ActivityDTO updateNewActivity(@PathVariable Long activityId,
+                                      @RequestParam(value = "file", required = false) MultipartFile file,
+                                      @ModelAttribute ActivityDTO activityDTO) throws IOException {
+        return activityService.update(activityId, activityDTO, file);
+    }
+
     @DeleteMapping("/delete/{activityId}")
     public void deleteActivity(@PathVariable Long activityId) throws FileNotFoundException {
         activityService.deleteActivity(activityId);

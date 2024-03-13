@@ -45,6 +45,14 @@ public class PersonelController {
         return personelService.updatePersonel(personelId, personelDTO, file);
     }
 
+    @PutMapping("/updateNew/{personelId}")
+    public PersonelDTO updatePersonelNew(@PathVariable Long personelId,
+                                      @RequestParam(value = "file", required = false) MultipartFile file,
+                                      @ModelAttribute PersonelDTO personelDTO) throws IOException {
+        // The service layer will handle conversion from DTO to entity, updating logic, and saving
+        return personelService.update(personelId, personelDTO, file);
+    }
+
     @DeleteMapping("admin/delete/{personelId}")
     @PreAuthorize("hasRole('ADMIN')")
     public void deletePersonel(@PathVariable Long personelId) throws IOException {

@@ -1,9 +1,9 @@
 package org.work.personnelinfo.file.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.work.personnelinfo.base.service.BaseService;
 import org.work.personnelinfo.file.dto.FileDTO;
 import org.work.personnelinfo.file.mapper.FileMapper;
 import org.work.personnelinfo.file.model.FileEntity;
@@ -18,28 +18,35 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
-public class FileService {
-    private final FileRepository fileRepository;
-    private final ResourceFileService resourceFileService;
-    private final PersonelRepository personelRepository;
-    private final FileMapper fileMapper;
+public class FileService extends BaseService<FileEntity, FileDTO, FileRepository> {
 
-    @Transactional(readOnly = true)
-    public FileDTO fetchFileById(Long id) {
-        validateId(id);
-        return fileRepository.findById(id)
-                .map(fileMapper::modelToDTO)
-                .orElseThrow(() -> new IllegalArgumentException("File not found with id: " + id));
+    private final FileMapper fileMapper;
+    private final PersonelRepository personelRepository;
+
+    public FileService(FileRepository fileRepository,
+                       ResourceFileService resourceFileService,
+                       FileMapper fileMapper,
+                       PersonelRepository personelRepository) {
+        super(fileRepository, resourceFileService);
+        this.fileMapper = fileMapper;
+        this.personelRepository = personelRepository;
     }
 
     @Transactional(readOnly = true)
     public List<FileDTO> fetchFilesByPersonelId(Long personelId) {
         validateId(personelId);
-        return fileRepository.findByPersonelId(personelId)
+        return repository.findByPersonelId(personelId)
                 .stream()
                 .map(fileMapper::modelToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public FileDTO fetchFileById(Long id) {
+        validateId(id);
+        return repository.findById(id)
+                .map(fileMapper::modelToDTO)
+                .orElseThrow(() -> new IllegalArgumentException("File not found with id: " + id));
     }
 
     @Transactional
@@ -69,7 +76,7 @@ public class FileService {
         if (fileEntity.getResourceFile() != null) {
             resourceFileService.deleteFile(fileEntity.getResourceFile().getId());
         }
-        fileRepository.delete(fileEntity);
+        repository.delete(fileEntity);
     }
 
    
@@ -94,7 +101,7 @@ public class FileService {
                 .orElseThrow(() -> new IllegalArgumentException("Personel not found with id: " + fileDTO.getPersonelId()));
 
         fileEntity.setPersonel(personelEntity);
-        fileRepository.save(fileEntity);
+        repository.save(fileEntity);
 
         return fileEntity;
     }
@@ -106,7 +113,7 @@ public class FileService {
     }
 
     private FileEntity validateExistingFile(Long fileId) throws FileNotFoundException {
-        return fileRepository.findById(fileId)
+        return repository.findById(fileId)
                 .orElseThrow(() -> new FileNotFoundException("File not found with id: " + fileId));
     }
 
@@ -115,6 +122,27 @@ public class FileService {
         fileMapper.updateModel(fileDTO, existingFileEntity);
         processUpload(file, existingFileEntity);
 
-        return fileRepository.save(existingFileEntity);
+        return repository.save(existingFileEntity);
     }
+
+    @Override
+    protected FileDTO convertToDto(FileEntity entity) {
+        return fileMapper.modelToDTO(entity);
+    }
+
+    @Override
+    protected FileEntity convertToEntity(FileDTO dto) {
+        validateInputs(dto, dto.getPersonelId());
+        FileEntity fileEntity = fileMapper.dtoToModel(dto);
+        PersonelEntity personelEntity = personelRepository.findById(dto.getPersonelId())
+                .orElseThrow(() -> new IllegalArgumentException("Personel not found with id: " + dto.getPersonelId()));
+        fileEntity.setPersonel(personelEntity);
+        return fileEntity;
+    }
+
+    @Override
+    protected void updateEntity(FileDTO dto, FileEntity entity) {
+        fileMapper.updateModel(dto, entity);
+    }
+
 }

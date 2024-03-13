@@ -40,8 +40,17 @@ public class FileController {
         return fileService.updateExistingFile(fileId, fileDTO, file);
     }
 
+    @PutMapping("/updateNew/{fileId}")
+    public FileDTO updateNewFile(@PathVariable Long fileId,
+                              @RequestParam(value = "file", required = false) MultipartFile file,
+                              @ModelAttribute FileDTO fileDTO) throws IOException {
+        return fileService.update(fileId, fileDTO, file);
+    }
+
     @DeleteMapping("/delete/{fileId}")
     public void deleteFile(@PathVariable Long fileId) throws FileNotFoundException {
         fileService.removeFile(fileId);
     }
+
+
 }

@@ -40,6 +40,13 @@ public class SlideController {
         return slideService.updateSlide(slideId, slideDTO, file);
     }
 
+    @PutMapping("/updateNew/{slideId}")
+    public SlideDTO updateNewActivity(@PathVariable Long slideId,
+                                   @RequestParam(value = "file", required = false) MultipartFile file,
+                                   @ModelAttribute SlideDTO slideDTO) throws IOException {
+        return slideService.update(slideId, slideDTO, file);
+    }
+
     @DeleteMapping("/delete/{slideId}")
     public void deleteActivity(@PathVariable Long slideId) throws FileNotFoundException {
         slideService.deleteSlide(slideId);
