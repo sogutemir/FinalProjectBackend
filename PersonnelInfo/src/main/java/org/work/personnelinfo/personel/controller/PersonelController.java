@@ -25,11 +25,17 @@ public class PersonelController {
         return personelService.getAllPersonel();
     }
 
+    @GetMapping("/new-personel")
+    public List<PersonelDTO> getNewPersonnel() {
+        return personelService.getNewPersonnel();
+    }
+
     @PostMapping("/admin/add")
     @PreAuthorize("hasRole('ADMIN')")
     public PersonelDTO addPersonel(@RequestParam(value = "file", required = false) MultipartFile file,
                                    @ModelAttribute PersonelDTO personelDTO) throws IOException {
         return personelService.addPersonel(personelDTO, file);
+        
     }
 
     @PutMapping("/update/{personelId}")

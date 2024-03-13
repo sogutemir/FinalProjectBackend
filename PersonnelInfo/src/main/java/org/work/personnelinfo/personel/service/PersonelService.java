@@ -10,8 +10,8 @@ import org.work.personnelinfo.personel.mapper.PersonelMapper;
 import org.work.personnelinfo.personel.repository.PersonelRepository;
 import org.work.personnelinfo.personel.model.PersonelEntity;
 import org.work.personnelinfo.resourceFile.service.ResourceFileService;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -37,6 +37,17 @@ public class PersonelService {
     public List<PersonelDTO> getAllPersonel() {
         List<PersonelEntity> personelEntities = personelRepository.findAll();
         return personelEntities.stream()
+                .map(personelMapper::modelToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<PersonelDTO> getNewPersonnel() {
+        LocalDate oneMonthAgo = LocalDate.now().minusMonths(1);
+        List<PersonelEntity> personelEntities =
+                personelRepository.findPersonnelWhoStartedWithinTheLastMonth(oneMonthAgo);
+
+        return  personelEntities.stream()
                 .map(personelMapper::modelToDTO)
                 .collect(Collectors.toList());
     }
@@ -82,7 +93,6 @@ public class PersonelService {
         personelRepository.delete(personelEntity);
     }
 
-    //ResourceFileServise taşınacak
     private void handleFile(ProcessType processType, MultipartFile file, PersonelEntity personelEntity) throws IOException {
         if (file != null && !file.isEmpty()) {
             if (processType == ProcessType.DELETE && personelEntity.getResourceFile() != null) {

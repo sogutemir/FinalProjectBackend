@@ -1,8 +1,6 @@
 package org.work.personnelinfo.personel.dto;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 import lombok.*;
 
 @Getter
