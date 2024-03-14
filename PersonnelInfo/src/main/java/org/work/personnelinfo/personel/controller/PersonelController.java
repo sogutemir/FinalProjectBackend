@@ -13,11 +13,17 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/personel")
 public class PersonelController {
+
     private final PersonelService personelService;
 
     @GetMapping("/{id}")
-    public PersonelDTO getPersonelById(@PathVariable Long id) {
-        return personelService.getPersonelById(id);
+    public Object getPersonelById(@PathVariable Long id, @RequestParam(required = false) Boolean isAll) {
+        if(isAll != null && isAll) {
+            return personelService.getPersonelById(id);
+        }
+        else {
+            return personelService.getFilteredPersonelById(id);
+        }
     }
 
     @GetMapping("/all")
@@ -49,7 +55,6 @@ public class PersonelController {
     public PersonelDTO updatePersonelNew(@PathVariable Long personelId,
                                       @RequestParam(value = "file", required = false) MultipartFile file,
                                       @ModelAttribute PersonelDTO personelDTO) throws IOException {
-        // The service layer will handle conversion from DTO to entity, updating logic, and saving
         return personelService.update(personelId, personelDTO, file);
     }
 

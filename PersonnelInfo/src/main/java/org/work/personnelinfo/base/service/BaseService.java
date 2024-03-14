@@ -18,7 +18,6 @@ public abstract class BaseService<T extends BaseEntity, D, R extends JpaReposito
         this.resourceFileService = resourceFileService;
     }
 
-    // Abstract methods to be implemented by subclasses for specific type mappings
     protected abstract D convertToDto(T entity);
     protected abstract T convertToEntity(D dto);
     protected abstract void updateEntity(D dto, T entity);

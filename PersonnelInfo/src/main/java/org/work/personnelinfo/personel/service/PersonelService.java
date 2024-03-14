@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.work.personnelinfo.base.service.BaseService;
 import org.work.personnelinfo.personel.dto.PersonelDTO;
 import org.work.personnelinfo.personel.mapper.PersonelMapper;
+import org.work.personnelinfo.personel.model.PersonelProjection;
 import org.work.personnelinfo.personel.repository.PersonelRepository;
 import org.work.personnelinfo.personel.model.PersonelEntity;
 import org.work.personnelinfo.resourceFile.service.ResourceFileService;
@@ -23,7 +24,7 @@ public class PersonelService extends BaseService<PersonelEntity, PersonelDTO, Pe
     private static final String PERSONEL_NOT_FOUND_WITH_ID = "Personel not found with id: ";
 
     public PersonelService(PersonelRepository personelRepository, ResourceFileService resourceFileService, PersonelMapper personelMapper) {
-        super(personelRepository, resourceFileService); // Call to the base class constructor
+        super(personelRepository, resourceFileService);
         this.personelMapper = personelMapper;
     }
 
@@ -43,7 +44,6 @@ public class PersonelService extends BaseService<PersonelEntity, PersonelDTO, Pe
     }
 
 
-
     private enum ProcessType {
         UPLOAD, DELETE
     }
@@ -51,6 +51,12 @@ public class PersonelService extends BaseService<PersonelEntity, PersonelDTO, Pe
     @Transactional(readOnly = true)
     public PersonelDTO getPersonelById(Long id) {
         return personelMapper.modelToDTO(getPersonelEntityById(id));
+    }
+
+
+    @Transactional(readOnly = true)
+    public PersonelProjection getFilteredPersonelById(Long id) {
+        return repository.findProjectionById(id);
     }
 
     @Transactional(readOnly = true)
