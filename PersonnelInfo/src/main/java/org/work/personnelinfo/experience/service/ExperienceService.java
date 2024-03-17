@@ -39,7 +39,7 @@ public class ExperienceService {
         return experienceRepository.findByPersonelId(personelId)
                 .stream()
                 .map(experienceMapper::modelToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
 

@@ -10,11 +10,9 @@ import org.work.personnelinfo.slide.dto.SlideDTO;
 import org.work.personnelinfo.slide.mapper.SlideMapper;
 import org.work.personnelinfo.slide.model.SlideEntity;
 import org.work.personnelinfo.slide.repository.SlideRepository;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class SlideService extends BaseService<SlideEntity, SlideDTO, SlideRepository> {

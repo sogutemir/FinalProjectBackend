@@ -24,4 +24,5 @@ public interface PersonelProjection {
     String getPosition();
     String getTitle();
     String getTeamName();
+    Long getPhotoId();
 }

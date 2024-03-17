@@ -19,5 +19,11 @@ public abstract class BaseEntity {
     @JoinColumn(name = "resource_file_id")
     private ResourceFileEntity resourceFile;
 
+    public Long getPhotoId() {
+        if (resourceFile != null) {
+            return resourceFile.getId();
+        }
+        return null;
+    }
 }
 
