@@ -51,6 +51,15 @@ public class PersonelService extends BaseService<PersonelEntity, PersonelDTO, Pe
         return personelMapper.modelToDTO(getPersonelEntityById(id));
     }
 
+    @Transactional(readOnly = true)
+    public List<PersonelDTO> getPersonelsByTeamName(String teamName)
+    {
+        List<PersonelEntity> personelEntities = repository.findByTeamName(teamName);
+
+        return personelEntities.stream()
+                .map(personelMapper::modelToDTO)
+                .toList();
+    }
 
     @Transactional(readOnly = true)
     public PersonelProjection getFilteredPersonelById(Long id) {

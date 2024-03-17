@@ -44,6 +44,11 @@ public class PersonelController {
         
     }
 
+    @GetMapping("/getByTeamName/{teamName}")
+    public List<PersonelDTO> getPersonelByTeamName(@PathVariable String teamName){
+        return personelService.getPersonelsByTeamName(teamName);
+    }
+
     @PutMapping("/update/{personelId}")
     public PersonelDTO updatePersonel(@PathVariable Long personelId,
                                       @RequestParam(value = "file", required = false) MultipartFile file,

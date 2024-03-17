@@ -11,12 +11,12 @@ import java.util.List;
 
 public interface PersonelRepository extends JpaRepository<PersonelEntity, Long> {
 
-    @Query("SELECT p FROM PersonelEntity p WHERE p.teamName = ?1")
-    List<PersonelEntity> findByTeamName(String teamName);
-
-    @Query("SELECT p FROM PersonelEntity p WHERE p.id = :id")
-    PersonelProjection findProjectionById(@Param("id") Long id);
+    @Query("SELECT p FROM PersonelEntity p WHERE p.teamName = :teamName")
+    List<PersonelEntity> findByTeamName(@Param("teamName") String teamName);
 
     @Query("SELECT p FROM PersonelEntity p WHERE p.startDateOfEmployment >= :fromDate")
     List<PersonelEntity> findPersonnelWhoStartedWithinTheLastMonth(@Param("fromDate") LocalDate fromDate);
+
+    @Query("SELECT p FROM PersonelEntity p WHERE p.id = :id")
+    PersonelProjection findProjectionById(@Param("id") Long id);
 }
