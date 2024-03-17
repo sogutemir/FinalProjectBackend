@@ -9,9 +9,8 @@ import org.work.personnelinfo.education.model.EducationEntity;
 import org.work.personnelinfo.education.repository.EducationRepository;
 import org.work.personnelinfo.personel.model.PersonelEntity;
 import org.work.personnelinfo.personel.repository.PersonelRepository;
-
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +31,7 @@ public class EducationService {
         return educationRepository.findByPersonelId(personelId)
                 .stream()
                 .map(educationMapper::modelToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional

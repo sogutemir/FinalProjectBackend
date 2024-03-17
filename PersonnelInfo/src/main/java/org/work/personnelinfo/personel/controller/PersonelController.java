@@ -32,7 +32,7 @@ public class PersonelController {
     }
 
     @GetMapping("/new-personel")
-    public List<PersonelDTO> getNewPersonnel() {
+    public @ResponseBody List<PersonelDTO> getNewPersonnel() {
         return personelService.getNewPersonnel();
     }
 

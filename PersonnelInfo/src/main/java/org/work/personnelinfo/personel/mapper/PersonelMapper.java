@@ -2,12 +2,8 @@ package org.work.personnelinfo.personel.mapper;
 
 
 import org.mapstruct.*;
-import org.work.personnelinfo.activity.mapper.ActivityMapper;
-import org.work.personnelinfo.education.mapper.EducationMapper;
-import org.work.personnelinfo.file.mapper.FileMapper;
 import org.work.personnelinfo.personel.dto.PersonelDTO;
 import org.work.personnelinfo.personel.model.PersonelEntity;
-import org.work.personnelinfo.project.mapper.ProjectMapper;
 
 
 @Mapper(componentModel = "spring",  nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

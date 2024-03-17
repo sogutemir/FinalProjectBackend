@@ -27,6 +27,7 @@ public abstract class BaseService<T extends BaseEntity, D, R extends JpaReposito
         Objects.requireNonNull(entityId, "Entity ID cannot be null");
         Objects.requireNonNull(dto, "DTO cannot be null");
 
+
         T existingEntity = repository.findById(entityId)
                 .orElseThrow(() -> new EntityNotFoundException("Entity not found with id: " + entityId));
 

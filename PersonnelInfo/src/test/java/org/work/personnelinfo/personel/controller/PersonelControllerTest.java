@@ -74,18 +74,33 @@ public class PersonelControllerTest {
         ).andExpect(status().isOk());
     }
 
+
     @Test
-    void testUpdatePersonel() throws Exception {
+    void testUpdatePersonelNew() throws Exception {
+        final Long personelId = 1L;
         MockMultipartFile file = new MockMultipartFile("file", "hello.txt", MediaType.TEXT_PLAIN_VALUE, "Hello, World!".getBytes());
         PersonelDTO personelDTO = new PersonelDTO();
         given(personelService.updatePersonel(anyLong(), any(PersonelDTO.class), any())).willReturn(personelDTO);
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/personel/update/1")
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/personel/updateNew/" + personelId)
                         .file(file)
                         .flashAttr("personelDTO", personelDTO)
                         .with(request -> {request.setMethod("PUT"); return request;})
                 )
                 .andExpect(status().isOk());
     }
+
+//    @Test
+//    void testUpdatePersonel() throws Exception {
+//        MockMultipartFile file = new MockMultipartFile("file", "hello.txt", MediaType.TEXT_PLAIN_VALUE, "Hello, World!".getBytes());
+//        PersonelDTO personelDTO = new PersonelDTO();
+//        given(personelService.updatePersonel(anyLong(), any(PersonelDTO.class), any())).willReturn(personelDTO);
+//        mockMvc.perform(MockMvcRequestBuilders.multipart("/personel/update/1")
+//                        .file(file)
+//                        .flashAttr("personelDTO", personelDTO)
+//                        .with(request -> {request.setMethod("PUT"); return request;})
+//                )
+//                .andExpect(status().isOk());
+//    }
 
     @Test
     void testDeletePersonel() throws Exception {

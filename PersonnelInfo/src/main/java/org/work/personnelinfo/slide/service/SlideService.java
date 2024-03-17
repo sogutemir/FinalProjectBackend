@@ -37,7 +37,7 @@ public class SlideService extends BaseService<SlideEntity, SlideDTO, SlideReposi
         return repository.findAll()
                 .stream()
                 .map(slideMapper::modelToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional(readOnly = true)

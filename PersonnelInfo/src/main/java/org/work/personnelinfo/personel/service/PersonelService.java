@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class PersonelService extends BaseService<PersonelEntity, PersonelDTO, PersonelRepository> {
@@ -43,7 +42,6 @@ public class PersonelService extends BaseService<PersonelEntity, PersonelDTO, Pe
         personelMapper.updateModel(dto, entity);
     }
 
-
     private enum ProcessType {
         UPLOAD, DELETE
     }
@@ -64,7 +62,7 @@ public class PersonelService extends BaseService<PersonelEntity, PersonelDTO, Pe
         List<PersonelEntity> personelEntities = repository.findAll();
         return personelEntities.stream()
                 .map(personelMapper::modelToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -75,7 +73,7 @@ public class PersonelService extends BaseService<PersonelEntity, PersonelDTO, Pe
 
         return  personelEntities.stream()
                 .map(personelMapper::modelToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional

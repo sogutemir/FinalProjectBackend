@@ -10,9 +10,8 @@ import org.work.personnelinfo.project.dto.ProjectUpdateRequestDTO;
 import org.work.personnelinfo.project.mapper.ProjectMapper;
 import org.work.personnelinfo.project.model.ProjectEntity;
 import org.work.personnelinfo.project.repository.ProjectRepository;
-
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +42,7 @@ public class ProjectService {
         return projectRepository.findByPersonelId(personelId)
                 .stream()
                 .map(projectMapper::modelToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional

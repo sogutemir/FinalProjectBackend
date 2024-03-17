@@ -12,11 +12,9 @@ import org.work.personnelinfo.base.service.BaseService;
 import org.work.personnelinfo.personel.model.PersonelEntity;
 import org.work.personnelinfo.personel.repository.PersonelRepository;
 import org.work.personnelinfo.resourceFile.service.ResourceFileService;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ActivityService extends BaseService<ActivityEntity, ActivityDTO, ActivityRepository> {
@@ -49,7 +47,7 @@ public class ActivityService extends BaseService<ActivityEntity, ActivityDTO, Ac
         return repository.findByPersonelId(personelId)
                 .stream()
                 .map(activityMapper::modelToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional
