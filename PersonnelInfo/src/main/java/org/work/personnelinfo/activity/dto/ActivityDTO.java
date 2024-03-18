@@ -26,6 +26,8 @@ public class ActivityDTO  {
         this.personelId = personelId;
     }
 
+    private Long fileId;
+
     @NotNull
     private Long personelId;
 

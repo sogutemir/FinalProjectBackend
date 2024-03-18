@@ -9,6 +9,7 @@ public interface ActivityMapper {
 
     @Mapping(target = "personelId", source = "personel.id")
     @Mapping(target = "fileName", source = "resourceFile.name")
+    @Mapping(target = "fileId", source = "resourceFile.id")
     ActivityDTO modelToDTO(ActivityEntity activityEntity);
 
     @Mapping(target = "personel.id", source = "personelId")
