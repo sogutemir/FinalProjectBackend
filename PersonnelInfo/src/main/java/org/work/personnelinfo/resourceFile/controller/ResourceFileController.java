@@ -25,7 +25,7 @@ public class ResourceFileController {
     @GetMapping("/download/{fileId}")
     public ResponseEntity<byte[]> downloadFile(@PathVariable Long fileId) throws FileNotFoundException {
         ResponseEntity.BodyBuilder responseBuilder = retrieveResourceFile(fileId);
-        ResourceFileDTO fileDto = resourceFileService.downloadFile(fileId); // repeat call is okay, since it likely includes some caching mechanism
+        ResourceFileDTO fileDto = resourceFileService.downloadFile(fileId);
         return responseBuilder
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileDto.getFileName() + "\"")
                 .body(fileDto.getData());
@@ -34,7 +34,7 @@ public class ResourceFileController {
     @GetMapping("/image/{fileId}")
     public ResponseEntity<Resource> serveImage(@PathVariable Long fileId) throws FileNotFoundException {
         ResponseEntity.BodyBuilder responseBuilder = retrieveResourceFile(fileId);
-        ResourceFileDTO fileDto = resourceFileService.downloadFile(fileId); // repeat call is okay, since it likely includes some caching mechanism
+        ResourceFileDTO fileDto = resourceFileService.downloadFile(fileId);
         return responseBuilder
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileDto.getFileName() + "\"")
                 .body(new ByteArrayResource(fileDto.getData()));

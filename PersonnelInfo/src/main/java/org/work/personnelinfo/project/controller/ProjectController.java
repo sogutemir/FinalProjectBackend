@@ -32,9 +32,7 @@ public class ProjectController {
 
     @PutMapping("/update/{projectId}")
     public ProjectDTO updateProject(@PathVariable Long projectId, @ModelAttribute ProjectDTO projectDTO){
-        ProjectUpdateRequestDTO updateRequest = new ProjectUpdateRequestDTO();
-        updateRequest.setProjectId(projectId);
-        updateRequest.setProjectDTO(projectDTO);
+        ProjectUpdateRequestDTO updateRequest = new ProjectUpdateRequestDTO(projectId, projectDTO);
         return projectService.updateProject(updateRequest);
     }
 
