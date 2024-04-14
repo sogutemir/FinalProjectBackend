@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.work.personnelinfo.personel.model.PersonelEntity;
 
 import java.util.Collection;
 
@@ -30,4 +31,16 @@ public class UserEntity {
     public Collection<RoleEntity> getRoles() {
         return roles;
     }
+
+
+    public UserEntity(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
+
+    @OneToOne(orphanRemoval = true)
+    @JoinColumn(name = "personel_id")
+    private PersonelEntity personel;
+
 }

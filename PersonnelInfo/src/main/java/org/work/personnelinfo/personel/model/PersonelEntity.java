@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.work.personnelinfo.activity.model.ActivityEntity;
+import org.work.personnelinfo.admin.model.UserEntity;
 import org.work.personnelinfo.base.model.BaseEntity;
 import org.work.personnelinfo.education.model.EducationEntity;
 import org.work.personnelinfo.experience.model.ExperienceEntity;
@@ -146,5 +147,7 @@ public class PersonelEntity extends BaseEntity {
     @OneToMany(mappedBy = "personel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FileEntity> personel_file;
 
+    @OneToOne(mappedBy = "personel", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserEntity personel_user;
 
 }

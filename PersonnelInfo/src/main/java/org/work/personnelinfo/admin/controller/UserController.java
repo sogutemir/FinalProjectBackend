@@ -1,18 +1,13 @@
 package org.work.personnelinfo.admin.controller;
 
 
-import jakarta.persistence.PrePersist;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.work.personnelinfo.admin.Service.AuthenticationService;
+import org.work.personnelinfo.admin.Service.UserService;
 import org.work.personnelinfo.admin.dto.UserDTO;
-import org.work.personnelinfo.personel.dto.PersonelDTO;
-
-import java.io.IOException;
 
 @RequiredArgsConstructor
 @RestController
@@ -20,6 +15,7 @@ import java.io.IOException;
 public class UserController {
 
     private final AuthenticationService authenticationService;
+    private final UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserDTO entity) throws Exception {
@@ -30,4 +26,13 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }
+
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
+        UserDTO updatedUserDTO = userService.updateUser(id, userDTO);
+        return new ResponseEntity<>(updatedUserDTO, HttpStatus.OK);
+    }
+
+
 }

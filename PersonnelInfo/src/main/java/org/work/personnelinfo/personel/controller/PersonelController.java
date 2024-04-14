@@ -3,6 +3,8 @@ package org.work.personnelinfo.personel.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.work.personnelinfo.admin.dto.UserDTO;
+import org.work.personnelinfo.personel.model.PersonelUserProjection;
 import org.work.personnelinfo.personel.service.PersonelService;
 import org.springframework.web.multipart.MultipartFile;
 import org.work.personnelinfo.personel.dto.PersonelDTO;
@@ -31,6 +33,11 @@ public class PersonelController {
         return personelService.getAllPersonel();
     }
 
+    @GetMapping("/allUser")
+    public List<PersonelUserProjection> getAllPersonelWithUserInfo() {
+        return personelService.getPersonelWithUserInformation();
+    }
+
     @GetMapping("/new-personel")
     public @ResponseBody List<PersonelDTO> getNewPersonnel() {
         return personelService.getNewPersonnel();
@@ -38,15 +45,19 @@ public class PersonelController {
 
     @PostMapping("/admin/add")
     @PreAuthorize("hasRole('ADMIN')")
-    public PersonelDTO addPersonel(@RequestParam(value = "file", required = false) MultipartFile file,
-                                   @ModelAttribute PersonelDTO personelDTO) throws IOException {
+    public UserDTO addPersonel(@RequestParam(value = "file", required = false) MultipartFile file,
+                               @ModelAttribute PersonelDTO personelDTO) throws IOException {
         return personelService.addPersonel(personelDTO, file);
-        
     }
 
     @GetMapping("/getByTeamName/{teamName}")
     public List<PersonelDTO> getPersonelByTeamName(@PathVariable String teamName){
         return personelService.getPersonelsByTeamName(teamName);
+    }
+
+    @GetMapping("/getTeamNameByUsername/{username}")
+    public String getTeamNameByUsername(@PathVariable String username){
+        return personelService.getTeamNameByUsername(username);
     }
 
     @PutMapping("/update/{personelId}")
