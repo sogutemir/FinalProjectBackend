@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.work.personnelinfo.admin.dto.UserDTO;
-import org.work.personnelinfo.admin.model.RoleEntity;
 import org.work.personnelinfo.admin.model.UserEntity;
 import org.work.personnelinfo.admin.repository.UserRepository;
 import org.work.personnelinfo.config.Security.JwtUtil;
@@ -31,7 +30,7 @@ public class AuthenticationService {
             throw new Exception("Invalid password");
         }
         List<String> roles = account.getRoles().stream()
-                .map(RoleEntity::getName)
+                .map(Enum::name)
                 .collect(Collectors.toList());
         return jwtUtil.generateToken(entity.getUsername(), roles);
     }

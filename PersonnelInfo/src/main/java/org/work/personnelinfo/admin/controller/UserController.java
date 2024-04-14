@@ -8,6 +8,10 @@ import org.springframework.web.bind.annotation.*;
 import org.work.personnelinfo.admin.Service.AuthenticationService;
 import org.work.personnelinfo.admin.Service.UserService;
 import org.work.personnelinfo.admin.dto.UserDTO;
+import org.work.personnelinfo.admin.model.Role;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -27,12 +31,23 @@ public class UserController {
         }
     }
 
+    @PutMapping("/{id}/roles")
+    public ResponseEntity<UserDTO> updateUserRoles(@PathVariable Long id, @RequestBody Set<String> roleNames) {
+        Set<Role> roles = roleNames.stream()
+                .map(String::toUpperCase)
+                .map(Role::valueOf)
+                .collect(Collectors.toSet());
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
-        UserDTO updatedUserDTO = userService.updateUser(id, userDTO);
-        return new ResponseEntity<>(updatedUserDTO, HttpStatus.OK);
+        try {
+            UserDTO updatedUser = userService.updateUserRoles(id, roles);
+            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
+
 
 
 }

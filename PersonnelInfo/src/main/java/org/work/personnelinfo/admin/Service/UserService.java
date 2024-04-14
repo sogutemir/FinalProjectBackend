@@ -3,27 +3,25 @@ package org.work.personnelinfo.admin.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.work.personnelinfo.admin.dto.UserDTO;
 import org.work.personnelinfo.admin.mapper.UserEntityMapper;
+import org.work.personnelinfo.admin.model.Role;
 import org.work.personnelinfo.admin.model.UserEntity;
-import org.work.personnelinfo.admin.model.RoleEntity;
 import org.work.personnelinfo.admin.repository.UserRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.Arrays;
 import java.util.HashSet;
-import org.work.personnelinfo.admin.repository.RoleRepository;
+import java.util.Set;
 import org.work.personnelinfo.personel.model.PersonelEntity;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final UserEntityMapper userEntityMapper;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, UserEntityMapper userEntityMapper ,BCryptPasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, UserEntityMapper userEntityMapper,
+                       BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
         this.userEntityMapper = userEntityMapper;
         this.passwordEncoder = passwordEncoder;
     }
@@ -34,18 +32,15 @@ public class UserService {
     }
 
     public void createUsers() {
-        RoleEntity adminRole = ensureRoleExists("ADMIN");
-        RoleEntity superUserRole = ensureRoleExists("SUPERUSER");
-        RoleEntity userRole = ensureRoleExists("USER");
+        UserEntity admin = createUserEntity("admin", "admin123", Role.ADMIN);
+        UserEntity superUser = createUserEntity("superuser", "superuser123", Role.SUPERUSER);
+        UserEntity user = createUserEntity("user", "user123", Role.USER);
+        UserEntity authUser = createUserEntity("authuser", "authuser123", Role.AUTHORIZEDUSER);
 
-        UserEntity admin = createUserEntity("admin", "admin123", adminRole);
-        UserEntity superUser = createUserEntity("superuser", "superuser123", superUserRole);
-        UserEntity user = createUserEntity("user", "user123", userRole);
-
-        userRepository.saveAll(Arrays.asList(admin, superUser, user));
+        userRepository.saveAll(Arrays.asList(admin, superUser, user, authUser));
     }
 
-    private UserEntity createUserEntity(String username, String password, RoleEntity role) {
+    private UserEntity createUserEntity(String username, String password, Role role) {
         UserEntity user = new UserEntity();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
@@ -58,37 +53,23 @@ public class UserService {
         user.setPersonel(personelEntity);
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
-        RoleEntity userRole = ensureRoleExists("USER");
-        user.setRoles(new HashSet<>(Arrays.asList(userRole)));
-
-
+        user.setRoles(new HashSet<>(Arrays.asList(Role.USER)));
         return userRepository.save(user);
     }
 
-    public UserDTO updateUser(Long id, UserDTO userDTO) {
-        UserEntity newUserEntity = userEntityMapper.toEntity(userDTO);
-
+    public UserDTO updateUserRoles(Long id, Set<Role> newRoles) {
         return userRepository.findById(id)
                 .map(existingUserEntity -> {
-                    userEntityMapper.partialUpdate(userDTO, existingUserEntity);
-                    UserEntity updatedUserEntity = userRepository.save(existingUserEntity);
-                    return userEntityMapper.toDto(updatedUserEntity);
+                    existingUserEntity.setRoles(newRoles);
+                    UserEntity savedUser = userRepository.save(existingUserEntity);
+                    return userEntityMapper.toDto(savedUser);
                 })
-                .orElseGet(() -> {
-                    newUserEntity.setId(id);
-                    UserEntity savedUserEntity = userRepository.save(newUserEntity);
-                    return userEntityMapper.toDto(savedUserEntity);
-                });
+                .orElseThrow(() -> new IllegalArgumentException("No user found with id " + id));
     }
 
 
-    private RoleEntity ensureRoleExists(String roleName) {
-        return roleRepository.findByName(roleName).orElseGet(() -> {
-            RoleEntity newRole = new RoleEntity(roleName);
-            roleRepository.save(newRole);
-            return newRole;
-        });
-    }
+
+
 
 
 }

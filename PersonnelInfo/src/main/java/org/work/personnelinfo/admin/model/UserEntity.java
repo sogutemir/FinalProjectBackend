@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.work.personnelinfo.personel.model.PersonelEntity;
 
 import java.util.Collection;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -22,16 +23,12 @@ public class UserEntity {
     private String username;
     private String password;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Collection<RoleEntity> roles;
 
-    public Collection<RoleEntity> getRoles() {
-        return roles;
-    }
-
+    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role")
+    private Set<Role> roles;
 
     public UserEntity(String username, String password) {
         this.username = username;
