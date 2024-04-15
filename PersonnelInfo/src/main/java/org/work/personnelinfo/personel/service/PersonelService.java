@@ -106,6 +106,11 @@ public class PersonelService extends BaseService<PersonelEntity, PersonelDTO, Pe
         return repository.findTeamNameByUsername(username);
     }
 
+    @Transactional(readOnly = true)
+    public PersonelDTO getPersonelByUsername(String username) {
+        return personelMapper.modelToDTO(repository.findUserByUsername(username));
+    }
+
     @Transactional
     public UserDTO addPersonel(PersonelDTO personelDTO, MultipartFile file) throws IOException {
         PersonelEntity newPersonelEntity = personelMapper.dtoToModel(Objects.requireNonNull(personelDTO, "PersonelDTO cannot be null"));

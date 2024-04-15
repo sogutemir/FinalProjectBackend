@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.work.personnelinfo.admin.dto.UserDTO;
+import org.work.personnelinfo.personel.model.PersonelEntity;
 import org.work.personnelinfo.personel.model.PersonelUserProjection;
 import org.work.personnelinfo.personel.service.PersonelService;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,6 +51,10 @@ public class PersonelController {
         return personelService.addPersonel(personelDTO, file);
     }
 
+    @GetMapping("/getPersonelByUsername/{username}")
+    public PersonelDTO getPersonelByUsername(@PathVariable String username){
+        return personelService.getPersonelByUsername(username);
+    }
     @GetMapping("/getByTeamName/{teamName}")
     public List<PersonelDTO> getPersonelByTeamName(@PathVariable String teamName){
         return personelService.getPersonelsByTeamName(teamName);
