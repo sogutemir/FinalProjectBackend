@@ -24,7 +24,7 @@ public interface PersonelRepository extends JpaRepository<PersonelEntity, Long> 
     @Query("SELECT p FROM PersonelEntity p WHERE p.id = :id")
     PersonelProjection findProjectionById(@Param("id") Long id);
 
-    @Query("SELECT p.name as name, p.surname as surname, u.roles as roles " +
+    @Query("SELECT p.name as name, p.surname as surname, u.roles as roles, u.id as userId " +
             "FROM PersonelEntity p " +
             "INNER JOIN p.personel_user u ")
     List<PersonelUserProjection> findAllProjected();

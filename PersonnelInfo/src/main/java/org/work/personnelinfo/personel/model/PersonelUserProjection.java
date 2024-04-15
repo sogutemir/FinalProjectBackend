@@ -9,4 +9,5 @@ public interface PersonelUserProjection {
     String getName();
     String getSurname();
     Set<Role> getRoles();
+    Long getUserId();
 }

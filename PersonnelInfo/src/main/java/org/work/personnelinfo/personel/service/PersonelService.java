@@ -112,8 +112,8 @@ public class PersonelService extends BaseService<PersonelEntity, PersonelDTO, Pe
         newPersonelEntity = repository.save(newPersonelEntity);
         handleFile(ProcessType.UPLOAD, file, newPersonelEntity);
         
-        String username = newPersonelEntity.getName() +newPersonelEntity.getSurname() + "@tubitak.gov.tr";
-        String password = newPersonelEntity.getSurname() + newPersonelEntity.getIdentityNumber();
+        String username = newPersonelEntity.getName() + newPersonelEntity.getSurname() + "@tubitak.gov.tr";
+        String password = newPersonelEntity.getIdentityNumber();
 
         return userEntityMapper.toDto(userService.createUserEntity(newPersonelEntity, username, password ));
     }
